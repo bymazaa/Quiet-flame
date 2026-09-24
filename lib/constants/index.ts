@@ -13,3 +13,7 @@ export const DEFAULT_CURRENCY = 'USD';
 
 export const ORDER_NUMBER_PREFIX = 'QF';
 export const ORDER_NUMBER_START = 10000;
+
+// Constants for authentication and session management.
+export const SESSION_COOKIE = 'qf_admin_session';
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days (seconds)
