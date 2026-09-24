@@ -1,126 +1,115 @@
-✅ Quiet Flame Project Checklist
-
-[ ] = বাকি, [x] = শেষ। শেষ হলে [ ] কে [x] করে নিন।
-
-🔧 Phase 1: Foundation
- Next.js প্রজেক্ট তৈরি (TypeScript, Tailwind, App Router, src/)
- pnpm সমস্যা ঠিক করা
- Packages install: mongoose zod bcryptjs jose zustand
- Packages install: react-hook-form @hookform/resolvers lucide-react clsx tailwind-merge sonner
- Dev packages: @types/bcryptjs tsx dotenv
- MongoDB Atlas cluster তৈরি
- Geoapify account ও API key
- .env.local ও .env.example
- lib/mongodb.ts (cached connection)
- Tailwind theme (orange + chocolate tokens)
- Fonts (serif + sans)
- next.config.ts (remote image URL)
- cn() helper, folder structure
- Reusable UI components (Button, Input, Card, Badge, Skeleton)
-🗄️ Phase 2: Database Models
- Admin model (failedLoginAttempts, lockUntil, tokenVersion সহ)
- Product model (compareAtPrice সহ)
- Order model (items[], discountAmount, payment ফিল্ড, snapshot)
- SiteSettings model
- Zod validation schemas
- services/ layer (product, order, settings, auth)
- Seed script (১ admin + sample products + default settings)
-🌐 Phase 3: Public Website
- Header (logo, nav, cart icon + badge, hamburger menu)
- Footer (settings থেকে data)
- Home: Hero
- Home: Collection (DB থেকে products)
- Home: Craft / About
- Home: Reviews
- Home: CTA
- /products (শুধু active products, out of stock চিহ্ন)
- /products/[slug] (gallery, description, stock, discount badge)
- /about
- /contact
- /privacy-policy
- /terms
- Loading skeletons, empty states, 404 পেজ
- সব জায়গায় Site Settings থেকে নাম/লোগো/ফোন/ঠিকানা
-🛒 Phase 4: Cart ও Checkout
- Zustand cart store (localStorage persist)
- Add to Cart ও Buy Now বাটন
- Cart drawer
- /cart পেজ (quantity বাড়ানো/কমানো, remove, subtotal)
- POST /api/cart/validate (stock, active, দাম মেলানো)
- /checkout পেজ
- Customer info form (নাম, ফোন, ইমেইল, address, city, state, ZIP)
- /api/address/suggest (Geoapify proxy, US-only)
- Address autocomplete component (debounce, hand-typing fallback)
- US ZIP ও phone validation
- Order review ধাপ (edit করে ফিরে যাওয়া সহ)
- POST /api/orders (server-এ দাম হিসাব, stock যাচাই)
- Unique order number (যেমন CND-10024)
- Stock কমানো (atomic)
- /order-confirmation/[orderNumber]
- Order সফল হলে cart খালি
-🔐 Phase 5: Admin Authentication
- /admin/login
- Login Server Action (bcrypt, JWT, HTTP-only cookie)
- Brute-force lock (৫ বার ভুল = ১৫ মিনিট)
- middleware.ts (/admin/* সুরক্ষা)
- getCurrentAdmin() (প্রতিটি action/route-এ যাচাই)
- Logout
- Session expiry ও tokenVersion
-🧑‍💼 Phase 6: Admin Dashboard
- Admin layout (sidebar, responsive)
- Dashboard summary (products, orders, revenue, pending payments)
- /admin/products (table, search, pagination)
- /admin/products/new (image URL input + preview)
- /admin/products/[id]/edit
- Delete confirmation (soft-delete/deactivate)
- Active/Inactive toggle
- /admin/orders (table, filter, search, pagination)
- /admin/orders/[id] (পূর্ণ বিবরণ)
- Order status বদলানো
- /admin/account (নাম, email, password পরিবর্তন)
- /admin/settings (নাম, logo URL, address, URL, phone, email, social)
- Toast বার্তা (সব সফল/ব্যর্থ action-এ)
- Admin loading ও empty states
-🔍 Phase 7: SEO ও Performance
- Metadata (title, description, Open Graph, Twitter) settings থেকে
- Product পেজের dynamic metadata ও canonical
- JSON-LD (Product structured data)
- sitemap.xml
- robots.txt (/admin block)
- Image alt text, next/image optimization
- Caching / revalidatePath
- Semantic HTML ও heading hierarchy
-🛡️ Phase 8: Security
- সব input-এ server-side Zod validation
- Secure headers (next.config)
- কোনো secret frontend-এ নেই
- .env.local gitignore-এ
- Order/checkout API-তে rate limiting
- Error বার্তায় sensitive তথ্য নেই
-🧪 Phase 9: Testing
- Home, Products, Details, Cart, Checkout, Confirmation
- Form validation ও ভুল ইনপুট
- Out of stock / inactive product দিয়ে order চেষ্টা
- Frontend-এ দাম বদলে order (server ঠিক দাম নিচ্ছে কিনা)
- Admin: login, logout, ভুল password, lock
- Admin: product CRUD, order status, settings, password change
- অননুমোদিত /admin ও Server Action অ্যাক্সেস
- Responsive: 320, 375, 425, 768, 1024, 1280, 1440
- কোথাও horizontal scroll নেই
- pnpm lint ও pnpm build সফল
-🚀 Phase 10: Deployment
- GitHub repo (secret ছাড়া)
- MongoDB Atlas production (IP access: Vercel-এর জন্য 0.0.0.0/0)
- Vercel প্রজেক্ট ও environment variables
- Production seed (admin তৈরি)
- Domain সংযোগ
- NEXT_PUBLIC_SITE_URL production URL
- Production-এ পূর্ণ order flow পরীক্ষা
- Client-কে admin credentials হস্তান্তর
-💳 Phase 11: ভবিষ্যৎ (এখন নয়)
- PayPal integration (create payment, server verify, webhook)
- Email notification (Resend)
- Analytics
-📌 Progress
-
-মোট কাজ প্রায় ১১৫টি
+Prodction Folder Stracture
+quiet-flame/
+├── .env.local                     # আসল secret (git-এ যাবে না)
+├── .env.example                   # ফাঁকা key তালিকা
+├── next.config.ts                 # remote image + secure headers
+├── package.json
+├── tsconfig.json
+├── scripts/
+│   └── seed.ts                    # ১ admin + products + default settings
+│
+├── public/
+│   └── favicon.ico
+│
+└── src/
+    ├── middleware.ts              # /admin/* সুরক্ষা
+    │
+    ├── app/
+    │   ├── globals.css            # Tailwind + orange/chocolate tokens
+    │   ├── layout.tsx             # root layout (fonts, Toaster)
+    │   ├── not-found.tsx
+    │   ├── sitemap.ts
+    │   ├── robots.ts
+    │   │
+    │   ├── (public)/
+    │   │   ├── layout.tsx         # Header + Footer + CartDrawer
+    │   │   ├── page.tsx           # Home
+    │   │   ├── products/
+    │   │   │   ├── page.tsx
+    │   │   │   ├── loading.tsx
+    │   │   │   └── [slug]/
+    │   │   │       ├── page.tsx
+    │   │   │       └── loading.tsx
+    │   │   ├── cart/page.tsx
+    │   │   ├── checkout/page.tsx
+    │   │   ├── order-confirmation/
+    │   │   │   └── [orderNumber]/page.tsx
+    │   │   ├── about/page.tsx
+    │   │   ├── contact/page.tsx
+    │   │   ├── privacy-policy/page.tsx
+    │   │   └── terms/page.tsx
+    │   │
+    │   ├── admin/
+    │   │   ├── login/
+    │   │   │   ├── page.tsx
+    │   │   │   └── actions.ts     # login Server Action
+    │   │   └── (dashboard)/
+    │   │       ├── layout.tsx     # sidebar + auth check
+    │   │       ├── page.tsx       # Dashboard summary
+    │   │       ├── loading.tsx
+    │   │       ├── products/
+    │   │       │   ├── page.tsx
+    │   │       │   ├── actions.ts
+    │   │       │   ├── new/page.tsx
+    │   │       │   └── [id]/edit/page.tsx
+    │   │       ├── orders/
+    │   │       │   ├── page.tsx
+    │   │       │   ├── actions.ts
+    │   │       │   └── [id]/page.tsx
+    │   │       ├── account/
+    │   │       │   ├── page.tsx
+    │   │       │   └── actions.ts
+    │   │       └── settings/
+    │   │           ├── page.tsx
+    │   │           └── actions.ts
+    │   │
+    │   └── api/
+    │       ├── orders/route.ts            # POST (customer)
+    │       ├── cart/validate/route.ts     # POST
+    │       ├── address/suggest/route.ts   # GET (Geoapify proxy)
+    │       └── paypal/                    # ভবিষ্যতে
+    │           └── webhook/route.ts
+    │
+    ├── components/
+    │   ├── ui/                    # Button, Input, Card, Badge, Skeleton, Modal
+    │   ├── layout/                # Header, Footer, MobileMenu
+    │   ├── home/                  # Hero, Collection, Craft, Reviews, CTA
+    │   ├── products/              # ProductCard, ProductGrid, ProductGallery, PriceTag
+    │   ├── cart/                  # CartDrawer, CartItem, CartSummary, CartButton
+    │   ├── checkout/              # CheckoutForm, AddressAutocomplete, OrderReview
+    │   └── admin/                 # Sidebar, StatCard, DataTable, ProductForm,
+    │                              # OrderStatusSelect, SettingsForm, Pagination
+    │
+    ├── lib/
+    │   ├── mongodb.ts             # cached connection
+    │   ├── auth.ts                # JWT sign/verify, cookie, getCurrentAdmin()
+    │   ├── utils.ts               # cn(), formatPrice()
+    │   ├── constants/
+    │   │   └── index.ts           # status তালিকা, রঙ map
+    │   └── validation/
+    │       ├── auth.schema.ts
+    │       ├── product.schema.ts
+    │       ├── order.schema.ts
+    │       ├── cart.schema.ts
+    │       └── settings.schema.ts
+    │
+    ├── models/
+    │   ├── Admin.ts
+    │   ├── Product.ts
+    │   ├── Order.ts
+    │   └── SiteSettings.ts
+    │
+    ├── services/                  # সব business logic এখানে
+    │   ├── auth.service.ts
+    │   ├── product.service.ts
+    │   ├── order.service.ts
+    │   ├── cart.service.ts
+    │   ├── settings.service.ts
+    │   ├── address.service.ts
+    │   └── dashboard.service.ts
+    │
+    ├── store/
+    │   └── cart.store.ts          # Zustand + localStorage
+    │
+    └── types/
+        └── index.ts
