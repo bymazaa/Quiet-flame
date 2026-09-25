@@ -10,6 +10,14 @@ export const siteSettingsSchema = z.object({
     websiteUrl: optionalHttpsUrlSchema,
     phone: optionalPhoneSchema,
     email: optionalEmailSchema,
+    shippingCost: z
+        .number()
+        .min(0, 'Shipping cost cannot be negative')
+        .max(1000, 'Shipping cost seems too high')
+        .refine(
+            (value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-6,
+            'Use at most 2 decimal places',
+        ),
     social: z.object({
         facebook: optionalHttpsUrlSchema,
         instagram: optionalHttpsUrlSchema,

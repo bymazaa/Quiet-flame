@@ -20,6 +20,7 @@ const siteSettingsSchema = new Schema(
             whatsapp: { type: String, default: '', trim: true },
             twitter: { type: String, default: '', trim: true },
         },
+        shippingCost: { type: Number, default: 0, min: 0 },
     },
     { timestamps: true },
 );

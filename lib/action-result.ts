@@ -1,3 +1,4 @@
+import { ApiError } from 'next/dist/server/api-utils';
 import type { ZodError } from 'zod';
 
 // Every Server Action returns this same shape, so forms can handle results uniformly.
@@ -29,4 +30,12 @@ export function zodFieldErrors(error: ZodError): Record<string, string[]> {
 /** return validationFail(parsed.error) */
 export function validationFail(error: ZodError): ActionResult<never> {
     return fail('Please check the highlighted fields.', zodFieldErrors(error));
+}
+
+export function handleError(
+    error: unknown,
+    userMessage = 'Something went wrong. Please try again.',
+) {
+    console.error(error);
+    return fail(userMessage);
 }
