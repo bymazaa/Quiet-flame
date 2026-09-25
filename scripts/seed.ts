@@ -28,7 +28,6 @@ const SAMPLE_PRODUCTS = [
             'A bright, blooming floral with warm citrus and soft petal notes. Hand-poured in a 9 oz jar with a clean-burning soy blend and cotton wick. Burns for about 45 to 50 hours.',
         price: 45,
         compareAtPrice: null,
-        stock: 25,
     },
     {
         name: 'Peony & Linen',
@@ -37,7 +36,6 @@ const SAMPLE_PRODUCTS = [
             'Fresh peony over the clean scent of sun-dried linen. Calm, airy and easy to live with. Hand-poured in a 9 oz jar. Burns for about 45 to 50 hours.',
         price: 45,
         compareAtPrice: null,
-        stock: 18,
     },
     {
         name: 'Olive & Lavender',
@@ -46,7 +44,6 @@ const SAMPLE_PRODUCTS = [
             'Soft lavender balanced by green olive leaf and a touch of amber. A relaxing evening candle. Hand-poured in a 9 oz jar. Burns for about 45 to 50 hours.',
         price: 38,
         compareAtPrice: 45, // sample discount to test the "Save %" badge
-        stock: 12,
     },
     {
         name: 'Wild Protea',
@@ -55,7 +52,6 @@ const SAMPLE_PRODUCTS = [
             'A rare, earthy floral with warm woods and a hint of honey. Hand-poured in a 9 oz jar. Burns for about 45 to 50 hours.',
         price: 45,
         compareAtPrice: null,
-        stock: 0, // sample out-of-stock product to test the UI
     },
 ];
 
@@ -131,6 +127,7 @@ async function main() {
                 description: 'Hand-poured soy candles made in small batches.',
                 logoUrl: '',
                 address: 'Troy, Michigan, USA',
+                shippingCost: 0,
                 websiteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
                 phone: '',
                 email: '',

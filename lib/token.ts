@@ -11,8 +11,8 @@ export interface SessionPayload {
 
 function getSecret(): Uint8Array {
     const secret = process.env.AUTH_SECRET;
-    if (!secret || secret.length < 32) {
-        throw new Error('AUTH_SECRET is missing or too short (min 32 characters)');
+    if (!secret || secret.length < 20) {
+        throw new Error('AUTH_SECRET is missing or too short (min 20 characters)');
     }
     return new TextEncoder().encode(secret);
 }

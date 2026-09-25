@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens for Quiet Flame.
+ * Tailwind v4 (CSS-first). If this project uses Tailwind v3 instead,
+ * move these values into tailwind.config.ts under theme.extend — see the
+ * note at the bottom of this file.
+ *
+ * Palette intent: warm, restrained, professional. One accent color
+ * (burnt orange) used sparingly for actions and emphasis only — not for
+ * backgrounds, not repeated on every element. Everything else is neutral
+ * warm cream/chocolate so the products (and their photos) stay the focus.
+ */
+@theme {
+  /* ---- Brand colors ---- */
+  --color-cream: #fff8f0; /* page background */
+  --color-surface: #ffffff; /* cards, panels, inputs */
+  --color-surface-muted: #fbf0e4; /* subtle alternate section background */
+
+  --color-chocolate: #3b2314; /* headings, primary text */
+  --color-chocolate-soft: #6b4a35; /* body text, secondary copy */
+  --color-chocolate-muted: #b0703a; /* eyebrows, quiet accents, placeholders */
+
+  --color-primary: #e8751a; /* buttons, links, active states */
+  --color-primary-dark: #c85f0f; /* hover/pressed */
+  --color-primary-soft: #fdeada; /* tinted backgrounds behind the accent, badges */
+
+  --color-border: #eadbcb; /* hairlines, dividers, input borders */
+  --color-border-strong: #ddc7ab; /* borders that need slightly more contrast */
+
+  /* ---- Status colors (admin badges: order & payment status) ---- */
+  --color-status-pending: #b0703a;
+  --color-status-pending-bg: #fbf0e4;
+  --color-status-confirmed: #2f5d9c;
+  --color-status-confirmed-bg: #e8f0fb;
+  --color-status-delivered: #2f7a4f;
+  --color-status-delivered-bg: #e7f4ec;
+  --color-status-cancelled: #a5402f;
+  --color-status-cancelled-bg: #fbeae7;
+
+  /* ---- Type ---- */
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* ---- Shape ---- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+
+  /* ---- Shadow (restrained; used deliberately, not on every card) ---- */
+  --shadow-soft: 0 1px 2px rgba(59, 35, 20, 0.05), 0 2px 8px rgba(59, 35, 20, 0.06);
+  --shadow-lifted: 0 4px 12px rgba(59, 35, 20, 0.08), 0 12px 32px rgba(59, 35, 20, 0.08);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ------------------------------------------------------------------ */
+/* Base styles                                                         */
+/* ------------------------------------------------------------------ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-chocolate);
+  font-family: var(--font-sans);
 }
+
+::selection {
+  background-color: var(--color-primary-soft);
+  color: var(--color-chocolate);
+}
+
+/* Visible, on-brand keyboard focus (accessibility) — never remove outline
+   without replacing it. */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * ---------------------------------------------------------------------
+ * TAILWIND v3 FALLBACK
+ * If this project is on Tailwind v3 (tailwind.config.ts, not CSS @theme):
+ * delete the @theme block above and instead put this in tailwind.config.ts:
+ *
+ *   theme: {
+ *     extend: {
+ *       colors: {
+ *         cream: "#fff8f0", surface: "#ffffff", "surface-muted": "#fbf0e4",
+ *         chocolate: { DEFAULT: "#3b2314", soft: "#6b4a35", muted: "#b0703a" },
+ *         primary: { DEFAULT: "#e8751a", dark: "#c85f0f", soft: "#fdeada" },
+ *         border: { DEFAULT: "#eadbcb", strong: "#ddc7ab" },
+ *       },
+ *       fontFamily: {
+ *         serif: ["var(--font-fraunces)", "Georgia", "serif"],
+ *         sans: ["var(--font-inter)", "sans-serif"],
+ *       },
+ *       borderRadius: { sm: "0.375rem", md: "0.625rem", lg: "1rem" },
+ *       boxShadow: {
+ *         soft: "0 1px 2px rgba(59,35,20,.05), 0 2px 8px rgba(59,35,20,.06)",
+ *         lifted: "0 4px 12px rgba(59,35,20,.08), 0 12px 32px rgba(59,35,20,.08)",
+ *       },
+ *     },
+ *   }
+ * ---------------------------------------------------------------------
+ */

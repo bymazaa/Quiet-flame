@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { objectIdSchema } from './common.schema';
 
-export const MAX_ITEM_QUANTITY = 10;
+export const MAX_ITEM_QUANTITY = 100;
 export const MAX_CART_ITEMS = 20;
 
 /* Only productId + quantity. Prices are NEVER accepted from the client. */
