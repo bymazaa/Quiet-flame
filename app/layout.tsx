@@ -36,11 +36,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
                 <Toaster
                     position="top-right"
+                    duration={3000}
                     toastOptions={{
                         style: {
                             background: 'var(--color-surface)',
                             color: 'var(--color-chocolate)',
                             border: '1px solid var(--color-border)',
+                            boxShadow: '0 2px 8px -2px rgb(0 0 0 / 0.08)',
+                            fontSize: '13px',
+                            padding: '10px 14px',
+                            width: '280px',
+                        },
+                        classNames: {
+                            success: 'border-l-2 !border-l-status-delivered',
+                            error: 'border-l-2 !border-l-status-cancelled',
                         },
                     }}
                 />

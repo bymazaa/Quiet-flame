@@ -28,9 +28,9 @@ export default async function AdminLoginPage() {
                         <Image
                             src={settings.logoUrl}
                             alt={settings.brandName}
-                            width={40}
-                            height={40}
-                            className="mx-auto mb-4 rounded-full"
+                            width={80}
+                            height={70}
+                            className="mx-auto mb-4 "
                         />
                     ) : null}
                     <p className="text-[13px] tracking-wide text-chocolate-muted">

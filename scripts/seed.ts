@@ -39,11 +39,11 @@ const SAMPLE_PRODUCTS = [
     },
     {
         name: 'Olive & Lavender',
-        slug: 'olive-and-lavender',
+        slug: 'olive-and-lavender-pro',
         description:
             'Soft lavender balanced by green olive leaf and a touch of amber. A relaxing evening candle. Hand-poured in a 9 oz jar. Burns for about 45 to 50 hours.',
         price: 38,
-        compareAtPrice: 45, // sample discount to test the "Save %" badge
+        compareAtPrice: 55, // sample discount to test the "Save %" badge
     },
     {
         name: 'Wild Protea',
@@ -129,9 +129,15 @@ async function main() {
                 address: 'Troy, Michigan, USA',
                 shippingCost: 0,
                 websiteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
-                phone: '',
-                email: '',
-                social: { facebook: '', instagram: '', whatsapp: '', twitter: '' },
+                phone: '(213) 792-0038',
+                email: 'quiteflame@official.com',
+                social: {
+                    facebook: 'https://www.facebook.com/p/Quite-Flame-61594366916853',
+                    instagram: '',
+                    whatsapp:
+                        'wa.me/12137920038?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20candles.',
+                    twitter: '',
+                },
             },
         },
         { upsert: true },
