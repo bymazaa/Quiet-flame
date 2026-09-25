@@ -87,11 +87,7 @@ export async function updateProfile(adminId: string, data: unknown): Promise<Act
         await connectDB();
 
         const emailTaken = await Admin.exists({ email: parsed.data.email, _id: { $ne: adminId } });
-        if (emailTaken) {
-            return fail('This email is already in use.', {
-                email: ['This email is already in use'],
-            });
-        }
+       
 
         const result = await Admin.updateOne({ _id: adminId }, { $set: parsed.data });
         if (result.matchedCount === 0) return fail('Account not found.');
