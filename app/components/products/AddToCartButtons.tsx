@@ -60,70 +60,50 @@ export function AddToCartButtons({
 
     const isStack = layout === 'stack';
 
-    return (
-        <div
-            className={cn(
-                'flex w-full gap-2',
-                isStack
-                    ? 'flex-col'
-                    : 'flex-row',
-            )}
+   return (
+    <div
+        className={cn(
+            'flex w-full gap-2',
+            layout === 'stack'
+                ? 'flex-col'
+                : 'flex-col sm:flex-row',
+        )}
+    >
+        <button
+            type="button"
+            onClick={handleAddToCart}
+            className={buttonVariants({
+                variant: 'secondary',
+                size: layout === 'stack' ? 'lg' : 'sm',
+                className:
+                    'w-full gap-1.5 border-orange-200 bg-white shadow-2xl shadow-gray-50 hover:bg-orange-50',
+            })}
         >
-            {/* Add to Cart */}
-            <button
-                type="button"
-                onClick={handleAddToCart}
-                className={buttonVariants({
-                    variant: 'secondary',
-                    size: isStack ? 'lg' : 'sm',
-                    className: cn(
-                        'min-w-0 flex-1 gap-1.5 whitespace-nowrap px-2.5',
-                        'border-orange-200 bg-white text-chocolate',
-                        'shadow-2xl shadow-gray-50',
-                        'transition-all duration-200',
-                        'hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700',
-                        'active:scale-[0.98]',
-                        isStack && 'w-full px-4',
-                    ),
-                })}
-            >
-                <ShoppingBag
-                    className="h-4 w-4 shrink-0"
-                    strokeWidth={1.75}
-                />
+            <ShoppingBag
+                className="h-4 w-4 shrink-0"
+                strokeWidth={1.75}
+            />
 
-                <span className="truncate">
-                    Add to Cart
-                </span>
-            </button>
+            Add to Cart
+        </button>
 
-            {/* Buy Now */}
-            <button
-                type="button"
-                onClick={handleBuyNow}
-                className={buttonVariants({
-                    size: isStack ? 'lg' : 'sm',
-                    className: cn(
-                        'min-w-0 flex-1 gap-1.5 whitespace-nowrap px-2.5',
-                        'bg-orange-500 text-white',
-                        'shadow-lg shadow-orange-100',
-                        'transition-all duration-200',
-                        'hover:bg-orange-600 hover:shadow-orange-200',
-                        'active:scale-[0.98]',
-                        isStack && 'w-full px-4',
-                    ),
-                })}
-            >
-                <Zap
-                    className="h-4 w-4 shrink-0"
-                    fill="currentColor"
-                    strokeWidth={1.6}
-                />
+        <button
+            type="button"
+            onClick={handleBuyNow}
+            className={buttonVariants({
+                size: layout === 'stack' ? 'lg' : 'sm',
+                className:
+                    'w-full gap-1.5 bg-orange-500 shadow-lg shadow-orange-100 hover:bg-orange-600',
+            })}
+        >
+            <Zap
+                className="h-4 w-4 shrink-0"
+                fill="currentColor"
+                strokeWidth={1.6}
+            />
 
-                <span className="truncate">
-                    Buy Now
-                </span>
-            </button>
-        </div>
-    );
+            Buy Now
+        </button>
+    </div>
+);
 }
