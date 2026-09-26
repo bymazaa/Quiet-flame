@@ -45,13 +45,17 @@ export const updateOrderStatusSchema = z.object({
     orderStatus: z.enum(ORDER_STATUSES),
 });
 
-/* /admin/orders?page=&search=&orderStatus=&paymentStatus= */
+export const ORDER_SORT_OPTIONS = ['newest', 'oldest', 'amount_desc', 'amount_asc'] as const;
+export type OrderSort = (typeof ORDER_SORT_OPTIONS)[number];
+
+/* /admin/orders?page=&search=&orderStatus=&paymentStatus=&sort= */
 export const orderListQuerySchema = z.object({
     page: pageSchema,
     search: searchSchema,
-    // invalid or "all" values become undefined instead of throwing
+    // invalid or "all" values become undefined/default instead of throwing
     orderStatus: z.enum(ORDER_STATUSES).optional().catch(undefined),
     paymentStatus: z.enum(PAYMENT_STATUSES).optional().catch(undefined),
+    sort: z.enum(ORDER_SORT_OPTIONS).catch('newest'),
 });
 
 /* /order-confirmation/[orderNumber] (e.g. CND-10024) */

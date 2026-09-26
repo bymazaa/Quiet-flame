@@ -1,84 +1,190 @@
+
 import Image from 'next/image';
-import { formatDate, formatPrice, hasDiscount } from '@/lib/utils';
+
+import {
+    formatDate,
+    formatPrice,
+    hasDiscount,
+} from '@/lib/utils';
+
 import { ProductActions } from '@/app/components/admin/ProductActions';
+
 import type { ProductDTO } from '@/services/product.service';
 
-export function ProductTable({ products }: { products: ProductDTO[] }) {
+export function ProductTable({
+    products,
+}: {
+    products: ProductDTO[];
+}) {
     return (
         <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[820px] text-left text-sm">
                 <thead>
-                    <tr className="border-b border-border text-[13px] text-chocolate-muted">
-                        <th className="w-16 py-3 pl-5 pr-3 font-medium">Image</th>
-                        <th className="px-3 py-3 font-medium">Product</th>
-                        <th className="px-3 py-3 font-medium">Price</th>
-                        <th className="px-3 py-3 font-medium">Status</th>
-                        <th className="px-3 py-3 font-medium">Created</th>
-                        <th className="w-32 py-3 pl-3 pr-5 text-right font-medium">Actions</th>
+                    <tr className="border-b border-orange-100 bg-orange-50/40">
+                        <th className="w-20 py-4 pl-5 pr-3 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Image
+                        </th>
+
+                        <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Product
+                        </th>
+
+                        <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Price
+                        </th>
+
+                        <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Status
+                        </th>
+
+                        <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Created
+                        </th>
+
+                        <th className="w-36 py-4 pl-3 pr-5 text-right text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
-                    {products.map((product) => (
-                        <tr key={product.id} className="border-b border-border last:border-0">
-                            <td className="py-3 pl-5 pr-3">
-                                <div className="relative h-11 w-11 overflow-hidden rounded-md border border-border bg-surface-muted">
-                                    {product.images[0] ? (
-                                        <Image
-                                            src={product.images[0]}
-                                            alt={product.name}
-                                            fill
-                                            sizes="44px"
-                                            className="object-cover"
-                                        />
-                                    ) : null}
-                                </div>
-                            </td>
-                            <td className="px-3 py-3">
-                                <p className="font-medium text-chocolate">{product.name}</p>
-                                <p className="text-xs text-chocolate-muted">/{product.slug}</p>
-                            </td>
-                            <td className="px-3 py-3">
-                                {hasDiscount(product.price, product.compareAtPrice) ? (
-                                    <div className="flex items-baseline gap-1.5">
-                                        <span className="text-chocolate">
-                                            {formatPrice(product.price, product.currency)}
-                                        </span>
-                                        <span className="text-xs text-chocolate-muted line-through">
-                                            {formatPrice(
-                                                product.compareAtPrice as number,
-                                                product.currency,
-                                            )}
-                                        </span>
+
+                <tbody className="divide-y divide-orange-50">
+                    {products.map((product) => {
+                        const discounted = hasDiscount(
+                            product.price,
+                            product.compareAtPrice,
+                        );
+
+                        return (
+                            <tr
+                                key={product.id}
+                                className="group bg-white transition-colors duration-200 hover:bg-orange-50/30"
+                            >
+                                {/* Image */}
+                                <td className="py-4 pl-5 pr-3">
+                                    <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-orange-100 bg-orange-50 shadow-sm">
+                                        {product.images[0] ? (
+                                            <Image
+                                                src={
+                                                    product.images[0]
+                                                }
+                                                alt={
+                                                    product.name
+                                                }
+                                                fill
+                                                sizes="48px"
+                                                className="object-cover transition duration-300 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-orange-400">
+                                                No image
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <span className="text-chocolate">
-                                        {formatPrice(product.price, product.currency)}
+                                </td>
+
+                                {/* Product */}
+                                <td className="px-3 py-4">
+                                    <div className="min-w-0">
+                                        <p className="max-w-[280px] truncate font-semibold text-chocolate">
+                                            {product.name}
+                                        </p>
+
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <span className="max-w-[280px] truncate text-xs text-chocolate-muted">
+                                                /{product.slug}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {/* Price */}
+                                <td className="px-3 py-4">
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold text-chocolate">
+                                                {formatPrice(
+                                                    product.price,
+                                                    product.currency,
+                                                )}
+                                            </span>
+
+                                            {discounted && (
+                                                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-600">
+                                                    SALE
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {discounted && (
+                                            <span className="mt-1 text-xs text-chocolate-muted line-through">
+                                                {formatPrice(
+                                                    product.compareAtPrice as number,
+                                                    product.currency,
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
+
+                                {/* Status */}
+                                <td className="px-3 py-4">
+                                    <span
+                                        className={
+                                            product.isActive
+                                                ? 'inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700'
+                                                : 'inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-semibold text-chocolate-muted ring-1 ring-inset ring-gray-200'
+                                        }
+                                    >
+                                        <span
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                product.isActive
+                                                    ? 'bg-emerald-500'
+                                                    : 'bg-gray-400'
+                                            }`}
+                                        />
+
+                                        {product.isActive
+                                            ? 'Active'
+                                            : 'Inactive'}
                                     </span>
-                                )}
-                            </td>
-                            <td className="px-3 py-3">
-                                <span
-                                    className={
-                                        product.isActive
-                                            ? 'inline-flex items-center rounded-full bg-status-delivered-bg px-2.5 py-1 text-xs font-medium text-status-delivered'
-                                            : 'inline-flex items-center rounded-full border border-border px-2.5 py-1 text-xs font-medium text-chocolate-muted'
-                                    }
-                                >
-                                    {product.isActive ? 'Active' : 'Inactive'}
-                                </span>
-                            </td>
-                            <td className="px-3 py-3 text-chocolate-soft">
-                                {formatDate(product.createdAt)}
-                            </td>
-                            <td className="py-3 pl-3 pr-5">
-                                <ProductActions
-                                    id={product.id}
-                                    isActive={product.isActive}
-                                    name={product.name}
-                                />
-                            </td>
-                        </tr>
-                    ))}
+                                </td>
+
+                                {/* Created */}
+                                <td className="px-3 py-4">
+                                    <div className="whitespace-nowrap">
+                                        <p className="text-sm font-medium text-chocolate-soft">
+                                            {formatDate(
+                                                product.createdAt,
+                                            )}
+                                        </p>
+
+                                        <p className="mt-0.5 text-[11px] text-chocolate-muted">
+                                            Created
+                                        </p>
+                                    </div>
+                                </td>
+
+                                {/* Actions */}
+                                <td className="py-4 pl-3 pr-5">
+                                    <div className="flex justify-end">
+                                        <div className="rounded-xl border border-orange-100 bg-white p-1 shadow-sm transition group-hover:border-orange-200 group-hover:shadow-md">
+                                            <ProductActions
+                                                id={
+                                                    product.id
+                                                }
+                                                isActive={
+                                                    product.isActive
+                                                }
+                                                name={
+                                                    product.name
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

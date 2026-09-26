@@ -22,7 +22,7 @@ export default async function AdminProductsPage({
     const products = data?.products ?? [];
 
     return (
-        <div className="max-w-5xl space-y-6">
+        <div className="max-w-6xl space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="font-serif text-2xl text-chocolate">Products</h1>

@@ -14,10 +14,10 @@ import type { ActionResult } from '@/lib/action-result';
  * UI -> action -> auth.service
  */
 export async function updateProfile(
-    adminId: string,
+    adminEmail: string,
     data: unknown,
 ): Promise<ActionResult> {
-    return updateProfileService(adminId, data);
+    return updateProfileService(adminEmail, data);
 }
 
 /**
@@ -26,9 +26,9 @@ export async function updateProfile(
  * UI -> action -> auth.service
  */
 export async function changePassword(
-    adminId: string,
+    adminEmail: string,
     data: unknown,
 ): Promise<ActionResult> {
-    return changePasswordService(adminId, data);
+    return changePasswordService(adminEmail, data);
 }
 

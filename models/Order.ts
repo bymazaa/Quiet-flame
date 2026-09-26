@@ -56,7 +56,7 @@ const orderSchema = new Schema(
 
         // PayPal-ready (filled later by server-side verification)
         paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: 'pending' },
-        paymentMethod: { type: String, enum: PAYMENT_METHODS, default: 'unpaid' },
+        paymentMethod: { type: String, enum: PAYMENT_METHODS, default: 'cash' },
         transactionId: { type: String, default: null }, // PayPal transaction ID (filled later by server-side verification)
     },
     { timestamps: true },

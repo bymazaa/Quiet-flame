@@ -25,7 +25,6 @@ export const loginSchema = z.object({
 /* /admin/account: update name & email */
 export const updateProfileSchema = z.object({
     name: nameSchema,
-    email: emailSchema,
 });
 
 /* /admin/account: change password */

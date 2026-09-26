@@ -29,11 +29,6 @@ export const productInputSchema = z
         compareAtPrice: moneySchema.nullable(),
         currency: currencySchema,
         images: z.array(imageUrlSchema).min(1, 'Add at least one image').max(8, 'Maximum 8 images'),
-        // stock: z
-        //     .number()
-        //     .int('Stock must be a whole number')
-        //     .min(0, 'Stock cannot be negative')
-        //     .max(1_000_000),
         isActive: z.boolean(),
     })
     .refine((data) => data.compareAtPrice === null || data.compareAtPrice > data.price, {

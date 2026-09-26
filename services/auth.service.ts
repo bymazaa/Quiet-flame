@@ -79,57 +79,110 @@ export async function logout(): Promise<ActionResult> {
 /* ------------------------------------------------------------------ */
 
 /** /admin/account: update name and email. */
-export async function updateProfile(adminId: string, data: unknown): Promise<ActionResult> {
+export async function updateProfile(
+    adminEmail: string,
+    data: unknown,
+): Promise<ActionResult> {
     const parsed = updateProfileSchema.safeParse(data);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
-        const emailTaken = await Admin.exists({ email: parsed.data.email, _id: { $ne: adminId } });
-       
+        const admin = await Admin.findOne({
+            email: adminEmail,
+        }).select('name email');
 
-        const result = await Admin.updateOne({ _id: adminId }, { $set: parsed.data });
-        if (result.matchedCount === 0) return fail('Account not found.');
+        if (!admin) {
+            return fail('Account not found.');
+        }
+
+        const newName = parsed.data.name.trim();
+        const currentName = admin.name.trim();
+
+        // Nothing changed
+        if (newName === currentName) {
+            return fail('No changes were made.');
+        }
+
+        await Admin.updateOne(
+            { email: adminEmail },
+            {
+                $set: {
+                    name: newName,
+                },
+            },
+            {
+                runValidators: true,
+            },
+        );
 
         return ok('Profile updated successfully.');
     } catch (error) {
         return handleError(error);
     }
 }
-
 /**
  * /admin/account: change password. Requires the current password.
  * Bumps tokenVersion so every other logged-in session (old JWTs) is
  * invalidated immediately.
  */
-export async function changePassword(adminId: string, data: unknown): Promise<ActionResult> {
+
+
+export async function changePassword(
+    adminEmail: string,
+    data: unknown,
+): Promise<ActionResult> {
     const parsed = changePasswordSchema.safeParse(data);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
-        const admin = await Admin.findById(adminId).select('+passwordHash tokenVersion');
-        if (!admin) return fail('Account not found.');
+        const admin = await Admin.findOne({
+            email: adminEmail,
+        }).select('+passwordHash tokenVersion failedLoginAttempts lockUntil');
 
-        const validCurrent = await verifyPassword(parsed.data.currentPassword, admin.passwordHash);
+        if (!admin) {
+            return fail('Account not found.');
+        }
+
+        const validCurrent = await verifyPassword(
+            parsed.data.currentPassword,
+            admin.passwordHash,
+        );
+
         if (!validCurrent) {
             return fail('Current password is incorrect.', {
-                currentPassword: ['Current password is incorrect'],
+                currentPassword: [
+                    'Current password is incorrect.',
+                ],
             });
         }
 
-        admin.passwordHash = await hashPassword(parsed.data.newPassword);
+        admin.passwordHash = await hashPassword(
+            parsed.data.newPassword,
+        );
+
         admin.tokenVersion += 1;
+
         admin.failedLoginAttempts = 0;
         admin.lockUntil = null;
+
         await admin.save();
 
-        // Old cookie is now invalid (tokenVersion mismatch); clear it explicitly too.
+        // Old sessions become invalid because tokenVersion changed.
         await destroySession();
 
-        return ok('Password changed successfully. Please log in again.');
+        return ok(
+            'Password changed successfully. Please log in again.',
+        );
     } catch (error) {
         return handleError(error);
     }
