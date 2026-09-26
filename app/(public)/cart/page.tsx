@@ -1,7 +1,13 @@
-import React from 'react'
+import type { Metadata } from 'next';
+import CartPageClient from './CartPageClient';
 
-export default function page() {
-  return (
-    <div>page</div>
-  )
+
+export const metadata: Metadata = {
+    title: 'Your Cart',
+    description:
+        'Review your selected candles before checkout.',
+};
+
+export default function CartPage() {
+    return <CartPageClient />;
 }

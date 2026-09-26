@@ -199,7 +199,7 @@ export function Sidebar({
             {/* =====================================================
                 Mobile top bar
             ===================================================== */}
-            <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-amber-200/60 bg-[#fffaf4]/95 px-4 backdrop-blur-md md:hidden">
+            <div className="print:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-amber-200/60 bg-[#fffaf4]/95 px-4 backdrop-blur-md md:hidden">
                 <div className="flex min-w-0 items-center gap-2.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-200 bg-white text-xs font-semibold text-amber-700 shadow-sm">
                         {brandName
