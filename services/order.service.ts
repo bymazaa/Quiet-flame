@@ -1,4 +1,3 @@
-
 import { Types } from 'mongoose';
 
 import { connectDB } from '@/lib/mongodb';
@@ -8,10 +7,7 @@ import { generateOrderNumber } from '@/lib/order-number';
 import { getManyByIds } from '@/services/product.service';
 import { getSettings } from '@/services/settings.service';
 
-import {
-    cartItemsSchema,
-    type CartItemInput,
-} from '@/lib/validation/cart.schema';
+import { cartItemsSchema, type CartItemInput } from '@/lib/validation/cart.schema';
 
 import {
     placeOrderSchema,
@@ -22,40 +18,18 @@ import {
 
 import { objectIdSchema } from '@/lib/validation/common.schema';
 
-import {
-    escapeRegex,
-    fromCents,
-    getPagination,
-    getTotalPages,
-    toCents,
-} from '@/lib/utils';
+import { escapeRegex, fromCents, getPagination, getTotalPages, toCents } from '@/lib/utils';
 
-import {
-    ok,
-    fail,
-    validationFail,
-    handleError,
-    type ActionResult,
-} from '@/lib/action-result';
+import { ok, fail, validationFail, handleError, type ActionResult } from '@/lib/action-result';
 
-import {
-    DEFAULT_CURRENCY,
-    type OrderStatus,
-} from '@/lib/constants';
+import { DEFAULT_CURRENCY, type OrderStatus } from '@/lib/constants';
+import { generateConfirmationToken, hashConfirmationToken } from '@/lib/token';
 
 const ADMIN_PAGE_SIZE = 10;
 
-const ADMIN_ORDER_STATUSES = [
-    'pending',
-    'confirmed',
-    'delivered',
-    'cancelled',
-] as const;
+const ADMIN_ORDER_STATUSES = ['pending', 'confirmed', 'delivered', 'cancelled'] as const;
 
-const ADMIN_PAYMENT_STATUSES = [
-    'pending',
-    'paid',
-] as const;
+const ADMIN_PAYMENT_STATUSES = ['pending', 'paid'] as const;
 
 type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 type AdminPaymentStatus = (typeof ADMIN_PAYMENT_STATUSES)[number];
@@ -132,8 +106,7 @@ function toOrderDTO(doc: LeanOrder): OrderDTO {
 
         customer: doc.customer as CustomerInfo,
 
-        shippingAddress:
-            doc.shippingAddress as ShippingAddressInfo,
+        shippingAddress: doc.shippingAddress as ShippingAddressInfo,
 
         items: doc.items.map((item) => ({
             productId: item.productId.toString(),
@@ -194,9 +167,7 @@ export interface CartValidationDTO {
  *
  * Does NOT create an order.
  */
-export async function validateCart(
-    items: unknown,
-): Promise<ActionResult<CartValidationDTO>> {
+export async function validateCart(items: unknown): Promise<ActionResult<CartValidationDTO>> {
     const parsed = cartItemsSchema.safeParse(items);
 
     if (!parsed.success) {
@@ -204,16 +175,9 @@ export async function validateCart(
     }
 
     try {
-        const products = await getManyByIds(
-            parsed.data.map((item) => item.productId),
-        );
+        const products = await getManyByIds(parsed.data.map((item) => item.productId));
 
-        const productMap = new Map(
-            products.map((product) => [
-                product._id.toString(),
-                product,
-            ]),
-        );
+        const productMap = new Map(products.map((product) => [product._id.toString(), product]));
 
         const validatedItems: CartValidationItemDTO[] = [];
         const removedProductIds: string[] = [];
@@ -221,17 +185,14 @@ export async function validateCart(
         let subtotalCents = 0;
 
         for (const item of parsed.data) {
-            const product = productMap.get(
-                item.productId,
-            );
+            const product = productMap.get(item.productId);
 
             if (!product) {
                 removedProductIds.push(item.productId);
                 continue;
             }
 
-            const lineTotalCents =
-                toCents(product.price) * item.quantity;
+            const lineTotalCents = toCents(product.price) * item.quantity;
 
             if (product.isActive) {
                 subtotalCents += lineTotalCents;
@@ -243,8 +204,7 @@ export async function validateCart(
                 slug: product.slug,
                 image: product.images?.[0] ?? '',
                 price: product.price,
-                compareAtPrice:
-                    product.compareAtPrice ?? null,
+                compareAtPrice: product.compareAtPrice ?? null,
                 quantity: item.quantity,
                 lineTotal: fromCents(lineTotalCents),
                 isActive: product.isActive,
@@ -293,19 +253,10 @@ type TotalsResult =
  * Rejects the whole order if any product no longer exists
  * or has been deactivated.
  */
-async function calculateOrderTotals(
-    cartItems: CartItemInput[],
-): Promise<TotalsResult> {
-    const products = await getManyByIds(
-        cartItems.map((item) => item.productId),
-    );
+async function calculateOrderTotals(cartItems: CartItemInput[]): Promise<TotalsResult> {
+    const products = await getManyByIds(cartItems.map((item) => item.productId));
 
-    const productMap = new Map(
-        products.map((product) => [
-            product._id.toString(),
-            product,
-        ]),
-    );
+    const productMap = new Map(products.map((product) => [product._id.toString(), product]));
 
     const unavailable: string[] = [];
     const items: OrderItemCalculated[] = [];
@@ -326,22 +277,14 @@ async function calculateOrderTotals(
             continue;
         }
 
-        const unitPriceCents =
-            toCents(product.price);
+        const unitPriceCents = toCents(product.price);
 
-        const lineTotalCents =
-            unitPriceCents * item.quantity;
+        const lineTotalCents = unitPriceCents * item.quantity;
 
         subtotalCents += lineTotalCents;
 
-        if (
-            product.compareAtPrice &&
-            product.compareAtPrice > product.price
-        ) {
-            discountCents +=
-                (toCents(product.compareAtPrice) -
-                    unitPriceCents) *
-                item.quantity;
+        if (product.compareAtPrice && product.compareAtPrice > product.price) {
+            discountCents += (toCents(product.compareAtPrice) - unitPriceCents) * item.quantity;
         }
 
         items.push({
@@ -359,9 +302,7 @@ async function calculateOrderTotals(
             success: false,
 
             error: `${unavailable.join(', ')} ${
-                unavailable.length > 1
-                    ? 'are'
-                    : 'is'
+                unavailable.length > 1 ? 'are' : 'is'
             } no longer available. Please update your cart.`,
         };
     }
@@ -387,21 +328,27 @@ async function calculateOrderTotals(
  * Returns just the order number so the caller can redirect
  * to /order-confirmation/[orderNumber].
  */
+
 export async function placeOrder(
     data: unknown,
 ): Promise<
-    ActionResult<{ orderNumber: string }>
+    ActionResult<{
+        orderNumber: string;
+        confirmationToken: string;
+    }>
 > {
-    const parsed = placeOrderSchema.safeParse(data);
+    const parsed =
+        placeOrderSchema.safeParse(data);
 
     if (!parsed.success) {
         return validationFail(parsed.error);
     }
 
     try {
-        const totals = await calculateOrderTotals(
-            parsed.data.items,
-        );
+        const totals =
+            await calculateOrderTotals(
+                parsed.data.items,
+            );
 
         if (!totals.success) {
             return fail(totals.error);
@@ -409,9 +356,8 @@ export async function placeOrder(
 
         const settings = await getSettings();
 
-        const shippingCostCents = toCents(
-            settings.shippingCost,
-        );
+        const shippingCostCents =
+            toCents(settings.shippingCost);
 
         const totalCents =
             totals.subtotalCents +
@@ -422,8 +368,17 @@ export async function placeOrder(
         const orderNumber =
             await generateOrderNumber();
 
+        // *Public confirmation token.*
+        // *Only the hash is stored in MongoDB.*
+        const {
+            token: confirmationToken,
+            hash: confirmationTokenHash,
+        } = generateConfirmationToken();
+
         await Order.create({
             orderNumber,
+
+            confirmationTokenHash,
 
             customer: parsed.data.customer,
 
@@ -444,7 +399,8 @@ export async function placeOrder(
                 shippingCostCents,
             ),
 
-            totalAmount: fromCents(totalCents),
+            totalAmount:
+                fromCents(totalCents),
 
             currency: DEFAULT_CURRENCY,
 
@@ -452,7 +408,8 @@ export async function placeOrder(
 
             paymentStatus: 'pending',
 
-            paymentMethod: 'unpaid',
+            paymentMethod:
+                parsed.data.paymentMethod,
 
             transactionId: null,
         });
@@ -461,13 +418,13 @@ export async function placeOrder(
             'Order placed successfully.',
             {
                 orderNumber,
+                confirmationToken,
             },
         );
     } catch (error) {
         return handleError(error);
     }
 }
-
 /* ------------------------------------------------------------------ */
 /* Public read                                                         */
 /* ------------------------------------------------------------------ */
@@ -475,11 +432,8 @@ export async function placeOrder(
 /**
  * /order-confirmation/[orderNumber]
  */
-export async function getOrderByNumber(
-    orderNumber: string,
-): Promise<OrderDTO | null> {
-    const parsed =
-        orderNumberSchema.safeParse(orderNumber);
+export async function getOrderByNumber(orderNumber: string): Promise<OrderDTO | null> {
+    const parsed = orderNumberSchema.safeParse(orderNumber);
 
     if (!parsed.success) {
         return null;
@@ -487,14 +441,11 @@ export async function getOrderByNumber(
 
     await connectDB();
 
-    const order =
-        await Order.findOne({
-            orderNumber: parsed.data,
-        }).lean<LeanOrder | null>();
+    const order = await Order.findOne({
+        orderNumber: parsed.data,
+    }).lean<LeanOrder | null>();
 
-    return order
-        ? toOrderDTO(order)
-        : null;
+    return order ? toOrderDTO(order) : null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -529,9 +480,7 @@ interface AdminOrderFilterQuery {
  * Builds the MongoDB filter used by admin order list,
  * summary, and CSV export.
  */
-function buildAdminOrderFilter(
-    query: AdminOrderFilterQuery,
-): Record<string, unknown> {
+function buildAdminOrderFilter(query: AdminOrderFilterQuery): Record<string, unknown> {
     const filter: Record<string, unknown> = {};
 
     if (query.orderStatus) {
@@ -539,8 +488,7 @@ function buildAdminOrderFilter(
     }
 
     if (query.paymentStatus) {
-        filter.paymentStatus =
-            query.paymentStatus;
+        filter.paymentStatus = query.paymentStatus;
     }
 
     if (query.search) {
@@ -571,9 +519,7 @@ function buildAdminOrderFilter(
         } = {};
 
         if (query.fromDate) {
-            const from = new Date(
-                `${query.fromDate}T00:00:00.000Z`,
-            );
+            const from = new Date(`${query.fromDate}T00:00:00.000Z`);
 
             if (!Number.isNaN(from.getTime())) {
                 createdAt.$gte = from;
@@ -581,19 +527,14 @@ function buildAdminOrderFilter(
         }
 
         if (query.toDate) {
-            const to = new Date(
-                `${query.toDate}T23:59:59.999Z`,
-            );
+            const to = new Date(`${query.toDate}T23:59:59.999Z`);
 
             if (!Number.isNaN(to.getTime())) {
                 createdAt.$lte = to;
             }
         }
 
-        if (
-            createdAt.$gte ||
-            createdAt.$lte
-        ) {
+        if (createdAt.$gte || createdAt.$lte) {
             filter.createdAt = createdAt;
         }
     }
@@ -611,11 +552,8 @@ function buildAdminOrderFilter(
  * pagination
  * summary counts
  */
-export async function getAdminOrders(
-    query: unknown,
-): Promise<ActionResult<PaginatedOrders>> {
-    const parsed =
-        orderListQuerySchema.safeParse(query);
+export async function getAdminOrders(query: unknown): Promise<ActionResult<PaginatedOrders>> {
+    const parsed = orderListQuerySchema.safeParse(query);
 
     if (!parsed.success) {
         return validationFail(parsed.error);
@@ -624,41 +562,24 @@ export async function getAdminOrders(
     try {
         await connectDB();
 
-        const rawQuery =
-            (query ?? {}) as Record<
-                string,
-                unknown
-            >;
+        const rawQuery = (query ?? {}) as Record<string, unknown>;
 
-        const {
-            page,
-            search,
-            orderStatus,
-            paymentStatus,
-            sort,
-        } = parsed.data;
+        const { page, search, orderStatus, paymentStatus, sort } = parsed.data;
 
-        const fromDate =
-            typeof rawQuery.fromDate === 'string'
-                ? rawQuery.fromDate
-                : undefined;
+        const fromDate = typeof rawQuery.fromDate === 'string' ? rawQuery.fromDate : undefined;
 
-        const toDate =
-            typeof rawQuery.toDate === 'string'
-                ? rawQuery.toDate
-                : undefined;
+        const toDate = typeof rawQuery.toDate === 'string' ? rawQuery.toDate : undefined;
 
         /*
          * Main table filter includes the selected order status.
          */
-        const filter =
-            buildAdminOrderFilter({
-                search,
-                orderStatus,
-                paymentStatus,
-                fromDate,
-                toDate,
-            });
+        const filter = buildAdminOrderFilter({
+            search,
+            orderStatus,
+            paymentStatus,
+            fromDate,
+            toDate,
+        });
 
         /*
          * Summary intentionally does NOT include
@@ -666,18 +587,14 @@ export async function getAdminOrders(
          * all statuses for the current search/date/payment
          * scope.
          */
-        const summaryFilter =
-            buildAdminOrderFilter({
-                search,
-                paymentStatus,
-                fromDate,
-                toDate,
-            });
+        const summaryFilter = buildAdminOrderFilter({
+            search,
+            paymentStatus,
+            fromDate,
+            toDate,
+        });
 
-        const sortMap: Record<
-            typeof sort,
-            Record<string, 1 | -1>
-        > = {
+        const sortMap: Record<typeof sort, Record<string, 1 | -1>> = {
             newest: {
                 createdAt: -1,
             },
@@ -695,55 +612,36 @@ export async function getAdminOrders(
             },
         };
 
-        const {
-            skip,
-            limit,
-        } = getPagination(
-            page,
-            ADMIN_PAGE_SIZE,
-        );
+        const { skip, limit } = getPagination(page, ADMIN_PAGE_SIZE);
 
-        const [
-            orders,
-            total,
-            summaryTotal,
-            pending,
-            confirmed,
-            delivered,
-            cancelled,
-        ] = await Promise.all([
-            Order.find(filter)
-                .sort(sortMap[sort])
-                .skip(skip)
-                .limit(limit)
-                .lean<LeanOrder[]>(),
+        const [orders, total, summaryTotal, pending, confirmed, delivered, cancelled] =
+            await Promise.all([
+                Order.find(filter).sort(sortMap[sort]).skip(skip).limit(limit).lean<LeanOrder[]>(),
 
-            Order.countDocuments(filter),
+                Order.countDocuments(filter),
 
-            Order.countDocuments(
-                summaryFilter,
-            ),
+                Order.countDocuments(summaryFilter),
 
-            Order.countDocuments({
-                ...summaryFilter,
-                orderStatus: 'pending',
-            }),
+                Order.countDocuments({
+                    ...summaryFilter,
+                    orderStatus: 'pending',
+                }),
 
-            Order.countDocuments({
-                ...summaryFilter,
-                orderStatus: 'confirmed',
-            }),
+                Order.countDocuments({
+                    ...summaryFilter,
+                    orderStatus: 'confirmed',
+                }),
 
-            Order.countDocuments({
-                ...summaryFilter,
-                orderStatus: 'delivered',
-            }),
+                Order.countDocuments({
+                    ...summaryFilter,
+                    orderStatus: 'delivered',
+                }),
 
-            Order.countDocuments({
-                ...summaryFilter,
-                orderStatus: 'cancelled',
-            }),
-        ]);
+                Order.countDocuments({
+                    ...summaryFilter,
+                    orderStatus: 'cancelled',
+                }),
+            ]);
 
         return ok(undefined, {
             orders: orders.map(toOrderDTO),
@@ -752,10 +650,7 @@ export async function getAdminOrders(
 
             page,
 
-            totalPages: getTotalPages(
-                total,
-                ADMIN_PAGE_SIZE,
-            ),
+            totalPages: getTotalPages(total, ADMIN_PAGE_SIZE),
 
             summary: {
                 total: summaryTotal,
@@ -773,11 +668,8 @@ export async function getAdminOrders(
 /**
  * /admin/orders/[id]
  */
-export async function getOrderById(
-    id: string,
-): Promise<OrderDTO | null> {
-    const parsedId =
-        objectIdSchema.safeParse(id);
+export async function getOrderById(id: string): Promise<OrderDTO | null> {
+    const parsedId = objectIdSchema.safeParse(id);
 
     if (!parsedId.success) {
         return null;
@@ -785,14 +677,9 @@ export async function getOrderById(
 
     await connectDB();
 
-    const order =
-        await Order.findById(
-            parsedId.data,
-        ).lean<LeanOrder | null>();
+    const order = await Order.findById(parsedId.data).lean<LeanOrder | null>();
 
-    return order
-        ? toOrderDTO(order)
-        : null;
+    return order ? toOrderDTO(order) : null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -809,11 +696,10 @@ export async function updateOrderStatus(
     orderId: string,
     orderStatus: string,
 ): Promise<ActionResult> {
-    const parsed =
-        updateOrderStatusSchema.safeParse({
-            orderId,
-            orderStatus,
-        });
+    const parsed = updateOrderStatusSchema.safeParse({
+        orderId,
+        orderStatus,
+    });
 
     if (!parsed.success) {
         return validationFail(parsed.error);
@@ -822,27 +708,23 @@ export async function updateOrderStatus(
     try {
         await connectDB();
 
-        const result =
-            await Order.updateOne(
-                {
-                    _id: parsed.data.orderId,
-                },
+        const result = await Order.updateOne(
+            {
+                _id: parsed.data.orderId,
+            },
 
-                {
-                    $set: {
-                        orderStatus:
-                            parsed.data.orderStatus,
-                    },
+            {
+                $set: {
+                    orderStatus: parsed.data.orderStatus,
                 },
-            );
+            },
+        );
 
         if (result.matchedCount === 0) {
             return fail('Order not found.');
         }
 
-        return ok(
-            'Order status updated successfully.',
-        );
+        return ok('Order status updated successfully.');
     } catch (error) {
         return handleError(error);
     }
@@ -862,51 +744,53 @@ export async function updatePaymentStatus(
     orderId: string,
     paymentStatus: string,
 ): Promise<ActionResult> {
-    const parsedId =
-        objectIdSchema.safeParse(orderId);
+    const parsedId = objectIdSchema.safeParse(orderId);
 
     if (!parsedId.success) {
         return validationFail(parsedId.error);
     }
 
-    if (
-        !ADMIN_PAYMENT_STATUSES.includes(
-            paymentStatus as AdminPaymentStatus,
-        )
-    ) {
-        return fail(
-            'Invalid payment status.',
-        );
+    if (!ADMIN_PAYMENT_STATUSES.includes(paymentStatus as AdminPaymentStatus)) {
+        return fail('Invalid payment status.');
     }
 
     try {
         await connectDB();
 
-        const result =
-            await Order.updateOne(
-                {
-                    _id: parsedId.data,
-                },
+        const result = await Order.updateOne(
+            {
+                _id: parsedId.data,
+            },
 
-                {
-                    $set: {
-                        paymentStatus,
-                    },
+            {
+                $set: {
+                    paymentStatus,
                 },
-            );
+            },
+        );
 
         if (result.matchedCount === 0) {
             return fail('Order not found.');
         }
 
-        return ok(
-            'Payment status updated successfully.',
-        );
+        return ok('Payment status updated successfully.');
     } catch (error) {
         return handleError(error);
     }
 }
 
+export async function getOrderByConfirmationToken(token: string): Promise<OrderDTO | null> {
+    // if (!token || token.length !== 64) {
+    //     return null;
+    // }
+    console.log(token)
+    const tokenHash = hashConfirmationToken(token);
 
+    await connectDB();
 
+    const order = await Order.findOne({
+        confirmationTokenHash: tokenHash,
+    }).lean<LeanOrder | null>();
 
+    return order ? toOrderDTO(order) : null;
+}

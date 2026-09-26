@@ -76,7 +76,7 @@ export function AddToCartButtons({
                 variant: 'secondary',
                 size: layout === 'stack' ? 'lg' : 'sm',
                 className:
-                    'w-full gap-1.5 border-orange-200 bg-white shadow-2xl shadow-gray-50 hover:bg-orange-50',
+                    'w-full gap-1.5 cursor-pointer border-orange-200 bg-white shadow-2xl shadow-gray-50 hover:bg-orange-50',
             })}
         >
             <ShoppingBag
@@ -93,7 +93,7 @@ export function AddToCartButtons({
             className={buttonVariants({
                 size: layout === 'stack' ? 'lg' : 'sm',
                 className:
-                    'w-full gap-1.5 bg-orange-500 shadow-lg shadow-orange-100 hover:bg-orange-600',
+                    'w-full gap-1.5 cursor-pointer bg-orange-500 shadow-lg shadow-orange-100 hover:bg-orange-600',
             })}
         >
             <Zap

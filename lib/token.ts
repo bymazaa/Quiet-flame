@@ -1,6 +1,8 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { SESSION_MAX_AGE } from './constants';
+import 'server-only';
 
+import { createHash, randomBytes } from 'node:crypto';
 // Uses only `jose`, so it is safe to import in middleware (Edge runtime).
 // Do NOT import mongoose or bcryptjs here.
 
@@ -44,4 +46,24 @@ export async function verifyToken(
     } catch {
         return null;
     }
+}
+
+interface ConfirmationToken {
+    token: string;
+    hash: string;
+}
+
+export function generateConfirmationToken(): ConfirmationToken {
+    const token = randomBytes(32).toString('hex');
+
+    const hash = createHash('sha256').update(token).digest('hex');
+
+    return {
+        token,
+        hash,
+    };
+}
+
+export function hashConfirmationToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
 }

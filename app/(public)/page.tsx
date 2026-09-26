@@ -7,9 +7,29 @@ import { FinalCTA } from "../components/home/CTA";
 import { FeaturedProducts } from "../components/home/FeaturedProducts";
 
 export const metadata: Metadata = {
-  title: "Home",
-};
+    title: 'Hand-Poured Soy Candles',
+    description:
+        'Discover handcrafted soy candles from Quiet Flame Co., made in small batches with premium fragrances for everyday moments.',
 
+    alternates: {
+        canonical: '/',
+    },
+
+    openGraph: {
+        title: 'Quiet Flame Co. | Hand-Poured Soy Candles',
+        description:
+            'Handcrafted soy candles made in small batches with premium fragrances and thoughtful craftsmanship.',
+        url: '/',
+        images: [
+            {
+                url: '/candle2.jpg',
+                width: 1200,
+                height: 630,
+                alt: 'Quiet Flame Co. handcrafted soy candle',
+            },
+        ],
+    },
+};
 export default async function HomePage() {
   const settings = await getSettings();
 

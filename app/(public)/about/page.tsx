@@ -16,8 +16,30 @@ import {
 
 import { getSettings } from '@/services/settings.service';
 
+
 export const metadata: Metadata = {
     title: 'About Us',
+    description:
+        'Learn the story behind Quiet Flame Co. and discover why we create handcrafted soy candles with thoughtful ingredients and care.',
+
+    alternates: {
+        canonical: '/about',
+    },
+
+    openGraph: {
+        title: 'About Quiet Flame Co.',
+        description:
+            'Discover the story, values, and craftsmanship behind Quiet Flame Co. handcrafted soy candles.',
+        url: '/about',
+        images: [
+            {
+                url: '/candle8.jpg',
+                width: 1200,
+                height: 630,
+                alt: 'Quiet Flame Co. handcrafted candle',
+            },
+        ],
+    },
 };
 
 const VALUES = [

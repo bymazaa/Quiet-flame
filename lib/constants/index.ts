@@ -6,7 +6,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
-export const PAYMENT_METHODS = ['unpaid', 'paypal'] as const;
+export const PAYMENT_METHODS = ['cod', 'paypal'] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const DEFAULT_CURRENCY = 'USD';

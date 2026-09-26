@@ -62,16 +62,53 @@ function toDTO(doc: SiteSettingsDB): SiteSettingsDTO {
  *
  *   const settings = await getSettings();
  */
+
 export async function getSettings(): Promise<SiteSettingsDTO> {
-    await connectDB();
 
-    const doc = await SiteSettings.findOneAndUpdate(
-        { key: SETTINGS_KEY },
-        { $setOnInsert: DEFAULT_SETTINGS },
-        { new: true, upsert: true },
-    ).lean();
+  const DEFAULT_SETTINGS: Omit<SiteSettingsDTO, 'updatedAt'> & {
+    key: string;
+} = {
+    key: SETTINGS_KEY,
 
-    return toDTO(doc);
+    brandName: 'Quiet Flame Co.',
+    logoUrl: '',
+    description: 'Hand-poured soy candles made in small batches.',
+
+    email: '',
+    phone: '',
+    address: '',
+    shippingCost: 0,
+    websiteUrl: '',
+
+    social: {
+        facebook: '',
+        instagram: '',
+        twitter: '',
+        whatsapp: '',
+    },
+};
+
+    try {
+        await connectDB();
+
+        const doc = await SiteSettings.findOneAndUpdate(
+            { key: SETTINGS_KEY },
+            { $setOnInsert: DEFAULT_SETTINGS },
+            {
+                new: true,
+                upsert: true,
+            },
+        ).lean();
+
+        return toDTO(doc);
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+
+        return {
+            ...DEFAULT_SETTINGS,
+            updatedAt: new Date(),
+        };
+    }
 }
 
 /**

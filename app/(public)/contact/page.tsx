@@ -12,8 +12,30 @@ import {
 import { getSettings } from '@/services/settings.service';
 
 export const metadata: Metadata = {
-    title: 'Contact',
+    title: 'Contact Us',
+    description:
+        'Get in touch with Quiet Flame Co. for questions about our handcrafted candles, orders, products, or anything else.',
+
+    alternates: {
+        canonical: '/contact',
+    },
+
+    openGraph: {
+        title: 'Contact Quiet Flame Co.',
+        description:
+            'Have a question about our candles or your order? Get in touch with Quiet Flame Co.',
+        url: '/contact',
+        images: [
+            {
+                url: '/candle2.jpg',
+                width: 1200,
+                height: 630,
+                alt: 'Quiet Flame Co. candle',
+            },
+        ],
+    },
 };
+
 
 export default async function ContactPage() {
     const settings = await getSettings();
