@@ -676,7 +676,7 @@ export default function EditProductForm({
                                 form.images.length >= 8 ||
                                 isPending
                             }
-                            className="mt-5 rounded-xl border border-dashed border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-bold text-orange-600 shadow-2xl shadow-gray-50 transition hover:bg-orange-100 disabled:opacity-40"
+                            className="mt-5 cursor-pointer rounded-xl border border-dashed border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-bold text-orange-600 shadow-2xl shadow-gray-50 transition hover:bg-orange-100 disabled:opacity-40"
                         >
                             + Add another image
                         </button>
@@ -776,14 +776,14 @@ export default function EditProductForm({
                                         !form.isActive,
                                     )
                                 }
-                                className={`relative h-7 w-12 rounded-full shadow-2xl shadow-gray-50 ${
+                                className={`relative cursor-pointer h-7 w-12 rounded-full shadow-2xl shadow-gray-50 ${
                                     form.isActive
                                         ? 'bg-orange-500'
                                         : 'bg-gray-300'
                                 }`}
                             >
                                 <span
-                                    className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                                    className={`absolute cursor-pointer top-1 h-5 w-5 rounded-full bg-white shadow-sm transition ${
                                         form.isActive
                                             ? 'left-6'
                                             : 'left-1'
@@ -819,7 +819,7 @@ export default function EditProductForm({
                     onClick={() =>
                         router.push('/admin/products')
                     }
-                    className="rounded-2xl border border-gray-200 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-2xl shadow-gray-50 transition hover:bg-gray-50 disabled:opacity-50"
+                    className="rounded-2xl border border-gray-200 bg-white px-6 py-3 text-sm font-bold text-gray-700 shadow-2xl shadow-gray-50 cursor-pointer transition hover:bg-gray-50 disabled:opacity-50"
                 >
                     Cancel
                 </button>
@@ -827,7 +827,7 @@ export default function EditProductForm({
                 <button
                     type="submit"
                     disabled={isPending}
-                    className="rounded-2xl bg-orange-500 px-7 py-3 text-sm font-bold text-white shadow-2xl shadow-orange-100 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-2xl bg-orange-500 px-7 py-3 text-sm font-bold text-white shadow-2xl shadow-orange-100 cursor-pointer transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {isPending
                         ? 'Updating Product...'

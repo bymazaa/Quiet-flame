@@ -757,7 +757,7 @@ export default function ProductCreateForm() {
                         onClick={() =>
                             router.push('/admin/products')
                         }
-                        className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 cursor-pointer transition hover:bg-slate-50 disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -765,7 +765,7 @@ export default function ProductCreateForm() {
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="rounded-xl bg-orange-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-orange-500 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200 cursor-pointer transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {isPending
                             ? 'Creating Product...'

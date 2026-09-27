@@ -504,7 +504,7 @@ export default function SettingsForm({
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-amber-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-amber-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:cursor-not-allowed cursor-pointer disabled:opacity-60"
                         >
                             {isPending ? (
                                 <Spinner />

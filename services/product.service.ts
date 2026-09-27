@@ -8,7 +8,13 @@ import {
 } from '@/lib/validation/product.schema';
 import { objectIdSchema } from '@/lib/validation/common.schema';
 import { escapeRegex, getPagination, getTotalPages } from '@/lib/utils';
-import { ok, fail, validationFail, handleError, type ActionResult } from '@/lib/action-result';
+import {
+    ok,
+    fail,
+    validationFail,
+    handleError,
+    type ActionResult,
+} from '@/lib/action-result';
 
 const ADMIN_PAGE_SIZE = 10;
 
@@ -55,14 +61,17 @@ function isDuplicateKeyError(error: unknown): boolean {
 }
 
 /* ------------------------------------------------------------------ */
-/* Public reads                                                        */
+/* Public reads                                                       */
 /* ------------------------------------------------------------------ */
 
 /** /products page: only active, non-deleted products. */
 export async function getActiveProducts(): Promise<ProductDTO[]> {
     await connectDB();
 
-    const products = await Product.find({ isActive: true, deletedAt: null })
+    const products = await Product.find({
+        isActive: true,
+        deletedAt: null,
+    })
         .sort({ createdAt: -1 })
         .lean<LeanProduct[]>();
 
@@ -70,7 +79,9 @@ export async function getActiveProducts(): Promise<ProductDTO[]> {
 }
 
 /** /products/[slug] page. Returns null if not found, inactive, or deleted. */
-export async function getProductBySlug(slug: string): Promise<ProductDTO | null> {
+export async function getProductBySlug(
+    slug: string,
+): Promise<ProductDTO | null> {
     await connectDB();
 
     const product = await Product.findOne({
@@ -83,7 +94,7 @@ export async function getProductBySlug(slug: string): Promise<ProductDTO | null>
 }
 
 /* ------------------------------------------------------------------ */
-/* Admin reads                                                         */
+/* Admin reads                                                        */
 /* ------------------------------------------------------------------ */
 
 export interface PaginatedProducts {
@@ -94,21 +105,35 @@ export interface PaginatedProducts {
 }
 
 /** /admin/products table: all non-deleted products (active + inactive), searchable, paginated. */
-export async function getAdminProducts(query: unknown): Promise<ActionResult<PaginatedProducts>> {
+export async function getAdminProducts(
+    query: unknown,
+): Promise<ActionResult<PaginatedProducts>> {
     const parsed = productListQuerySchema.safeParse(query);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
         const { page, search } = parsed.data;
-        const filter: Record<string, unknown> = { deletedAt: null };
+
+        const filter: Record<string, unknown> = {
+            deletedAt: null,
+        };
 
         if (search) {
-            filter.name = { $regex: escapeRegex(search), $options: 'i' };
+            filter.name = {
+                $regex: escapeRegex(search),
+                $options: 'i',
+            };
         }
 
-        const { skip, limit } = getPagination(page, ADMIN_PAGE_SIZE);
+        const { skip, limit } = getPagination(
+            page,
+            ADMIN_PAGE_SIZE,
+        );
 
         const [products, total] = await Promise.all([
             Product.find(filter)
@@ -116,6 +141,7 @@ export async function getAdminProducts(query: unknown): Promise<ActionResult<Pag
                 .skip(skip)
                 .limit(limit)
                 .lean<LeanProduct[]>(),
+
             Product.countDocuments(filter),
         ]);
 
@@ -131,9 +157,14 @@ export async function getAdminProducts(query: unknown): Promise<ActionResult<Pag
 }
 
 /** /admin/products/[id]/edit: prefill the form. */
-export async function getProductById(id: string): Promise<ProductDTO | null> {
+export async function getProductById(
+    id: string,
+): Promise<ProductDTO | null> {
     const parsedId = objectIdSchema.safeParse(id);
-    if (!parsedId.success) return null;
+
+    if (!parsedId.success) {
+        return null;
+    }
 
     await connectDB();
 
@@ -141,79 +172,144 @@ export async function getProductById(id: string): Promise<ProductDTO | null> {
         _id: parsedId.data,
         deletedAt: null,
     }).lean<LeanProduct | null>();
+
     return product ? toDTO(product) : null;
 }
 
 /* ------------------------------------------------------------------ */
-/* Admin writes                                                        */
+/* Admin writes                                                       */
 /* ------------------------------------------------------------------ */
 
 /** /admin/products/new */
-export async function createProduct(data: unknown): Promise<ActionResult<ProductDTO>> {
+export async function createProduct(
+    data: unknown,
+): Promise<ActionResult<ProductDTO>> {
     const parsed = productInputSchema.safeParse(data);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
-        const product = await Product.create({ ...parsed.data, deletedAt: null });
-        return ok('Product created successfully.', toDTO(product.toObject() as LeanProduct));
+        const product = await Product.create({
+            ...parsed.data,
+            deletedAt: null,
+        });
+
+        return ok(
+            'Product created successfully.',
+            toDTO(product.toObject() as LeanProduct),
+        );
     } catch (error) {
         if (isDuplicateKeyError(error)) {
-            return fail('A product with this slug already exists.', {
-                slug: ['This slug is already in use'],
-            });
+            return fail(
+                'A product with this slug already exists.',
+                {
+                    slug: ['This slug is already in use'],
+                },
+            );
         }
+
         return handleError(error);
     }
 }
 
 /** /admin/products/[id]/edit */
-export async function updateProduct(id: string, data: unknown): Promise<ActionResult<ProductDTO>> {
+export async function updateProduct(
+    id: string,
+    data: unknown,
+): Promise<ActionResult<ProductDTO>> {
     const parsedId = objectIdSchema.safeParse(id);
-    if (!parsedId.success) return fail('Invalid product.');
+
+    if (!parsedId.success) {
+        return fail('Invalid product.');
+    }
 
     const parsed = productInputSchema.safeParse(data);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
         const product = await Product.findOneAndUpdate(
-            { _id: parsedId.data, deletedAt: null },
-            { $set: parsed.data },
-            { new: true, runValidators: true },
+            {
+                _id: parsedId.data,
+                deletedAt: null,
+            },
+            {
+                $set: parsed.data,
+            },
+            {
+                returnDocument: 'after',
+                runValidators: true,
+            },
         ).lean<LeanProduct | null>();
 
-        if (!product) return fail('Product not found.');
+        if (!product) {
+            return fail('Product not found.');
+        }
 
-        return ok('Product updated successfully.', toDTO(product));
+        return ok(
+            'Product updated successfully.',
+            toDTO(product),
+        );
     } catch (error) {
         if (isDuplicateKeyError(error)) {
-            return fail('A product with this slug already exists.', {
-                slug: ['This slug is already in use'],
-            });
+            return fail(
+                'A product with this slug already exists.',
+                {
+                    slug: ['This slug is already in use'],
+                },
+            );
         }
+
         return handleError(error);
     }
 }
 
 /** Activate / deactivate toggle in the admin product table. */
-export async function setProductActive(id: string, isActive: boolean): Promise<ActionResult> {
-    const parsed = setProductActiveSchema.safeParse({ id, isActive });
-    if (!parsed.success) return validationFail(parsed.error);
+export async function setProductActive(
+    id: string,
+    isActive: boolean,
+): Promise<ActionResult> {
+    const parsed = setProductActiveSchema.safeParse({
+        id,
+        isActive,
+    });
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
 
         const result = await Product.updateOne(
-            { _id: parsed.data.id, deletedAt: null },
-            { $set: { isActive: parsed.data.isActive } },
+            {
+                _id: parsed.data.id,
+                deletedAt: null,
+            },
+            {
+                $set: {
+                    isActive: parsed.data.isActive,
+                },
+            },
         );
 
-        if (result.matchedCount === 0) return fail('Product not found.');
+        if (result.matchedCount === 0) {
+            return fail('Product not found.');
+        }
 
-        return ok(parsed.data.isActive ? 'Product activated.' : 'Product deactivated.');
+        return ok(
+            parsed.data.isActive
+                ? 'Product activated.'
+                : 'Product deactivated.',
+        );
     } catch (error) {
         return handleError(error);
     }
@@ -223,19 +319,34 @@ export async function setProductActive(id: string, isActive: boolean): Promise<A
  * Soft delete: marks the product as deleted and inactive instead of removing
  * it, so historical orders (which store a snapshot) are never affected.
  */
-export async function softDeleteProduct(id: string): Promise<ActionResult> {
+export async function softDeleteProduct(
+    id: string,
+): Promise<ActionResult> {
     const parsedId = objectIdSchema.safeParse(id);
-    if (!parsedId.success) return validationFail(parsedId.error);
+
+    if (!parsedId.success) {
+        return validationFail(parsedId.error);
+    }
 
     try {
         await connectDB();
 
         const result = await Product.updateOne(
-            { _id: parsedId.data, deletedAt: null },
-            { $set: { deletedAt: new Date(), isActive: false } },
+            {
+                _id: parsedId.data,
+                deletedAt: null,
+            },
+            {
+                $set: {
+                    deletedAt: new Date(),
+                    isActive: false,
+                },
+            },
         );
 
-        if (result.matchedCount === 0) return fail('Product not found.');
+        if (result.matchedCount === 0) {
+            return fail('Product not found.');
+        }
 
         return ok('Product deleted successfully.');
     } catch (error) {
@@ -244,7 +355,7 @@ export async function softDeleteProduct(id: string): Promise<ActionResult> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Internal helper - used by order.service.ts only                     */
+/* Internal helper - used by order.service.ts only                    */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -252,11 +363,23 @@ export async function softDeleteProduct(id: string): Promise<ActionResult> {
  * Returns raw (lean) documents, not DTOs, and is NOT exposed to the client
  * directly. Invalid or missing ids are silently skipped.
  */
-export async function getManyByIds(ids: string[]): Promise<LeanProduct[]> {
-    const validIds = ids.filter((id) => objectIdSchema.safeParse(id).success);
-    if (validIds.length === 0) return [];
+export async function getManyByIds(
+    ids: string[],
+): Promise<LeanProduct[]> {
+    const validIds = ids.filter(
+        (id) => objectIdSchema.safeParse(id).success,
+    );
+
+    if (validIds.length === 0) {
+        return [];
+    }
 
     await connectDB();
 
-    return Product.find({ _id: { $in: validIds }, deletedAt: null }).lean<LeanProduct[]>();
+    return Product.find({
+        _id: {
+            $in: validIds,
+        },
+        deletedAt: null,
+    }).lean<LeanProduct[]>();
 }

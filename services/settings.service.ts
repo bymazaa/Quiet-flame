@@ -1,7 +1,16 @@
 import { connectDB } from '@/lib/mongodb';
+
 import { SiteSettings, type SiteSettingsDB } from '@/models/SiteSettings';
+
 import { siteSettingsSchema } from '@/lib/validation/settings.schema';
-import { ok, fail, validationFail, handleError, type ActionResult } from '@/lib/action-result';
+
+import {
+    ok,
+    fail,
+    validationFail,
+    handleError,
+    type ActionResult,
+} from '@/lib/action-result';
 
 const SETTINGS_KEY = 'main';
 
@@ -15,7 +24,12 @@ const DEFAULT_SETTINGS = {
     websiteUrl: '',
     phone: '',
     email: '',
-    social: { facebook: '', instagram: '', whatsapp: '', twitter: '' },
+    social: {
+        facebook: '',
+        instagram: '',
+        whatsapp: '',
+        twitter: '',
+    },
 };
 
 export interface SiteSettingsDTO {
@@ -60,33 +74,28 @@ function toDTO(doc: SiteSettingsDB): SiteSettingsDTO {
  * Read the site settings singleton. Creates it with sensible defaults
  * the first time it's called, so callers never have to handle `null`.
  *
- *   const settings = await getSettings();
+ * const settings = await getSettings();
  */
-
 export async function getSettings(): Promise<SiteSettingsDTO> {
-
-  const DEFAULT_SETTINGS: Omit<SiteSettingsDTO, 'updatedAt'> & {
-    key: string;
-} = {
-    key: SETTINGS_KEY,
-
-    brandName: 'Quiet Flame Co.',
-    logoUrl: '',
-    description: 'Hand-poured soy candles made in small batches.',
-
-    email: '',
-    phone: '',
-    address: '',
-    shippingCost: 0,
-    websiteUrl: '',
-
-    social: {
-        facebook: '',
-        instagram: '',
-        twitter: '',
-        whatsapp: '',
-    },
-};
+    const DEFAULT_SETTINGS: Omit<SiteSettingsDTO, 'updatedAt'> & {
+        key: string;
+    } = {
+        key: SETTINGS_KEY,
+        brandName: 'Quiet Flame Co.',
+        logoUrl: '',
+        description: 'Hand-poured soy candles made in small batches.',
+        email: '',
+        phone: '',
+        address: '',
+        shippingCost: 0,
+        websiteUrl: '',
+        social: {
+            facebook: '',
+            instagram: '',
+            twitter: '',
+            whatsapp: '',
+        },
+    };
 
     try {
         await connectDB();
@@ -95,7 +104,7 @@ export async function getSettings(): Promise<SiteSettingsDTO> {
             { key: SETTINGS_KEY },
             { $setOnInsert: DEFAULT_SETTINGS },
             {
-                new: true,
+                returnDocument: 'after',
                 upsert: true,
             },
         ).lean();
@@ -115,11 +124,16 @@ export async function getSettings(): Promise<SiteSettingsDTO> {
  * Admin settings form. Validates input itself (do not validate again in the
  * Server Action). Always updates the single settings document.
  *
- *   const result = await updateSettings(formData);
+ * const result = await updateSettings(formData);
  */
-export async function updateSettings(data: unknown): Promise<ActionResult<SiteSettingsDTO>> {
+export async function updateSettings(
+    data: unknown,
+): Promise<ActionResult<SiteSettingsDTO>> {
     const parsed = siteSettingsSchema.safeParse(data);
-    if (!parsed.success) return validationFail(parsed.error);
+
+    if (!parsed.success) {
+        return validationFail(parsed.error);
+    }
 
     try {
         await connectDB();
@@ -127,12 +141,20 @@ export async function updateSettings(data: unknown): Promise<ActionResult<SiteSe
         const doc = await SiteSettings.findOneAndUpdate(
             { key: SETTINGS_KEY },
             { $set: parsed.data },
-            { new: true, upsert: true },
+            {
+                returnDocument: 'after',
+                upsert: true,
+            },
         ).lean();
 
-        if (!doc) return fail('Could not save settings.');
+        if (!doc) {
+            return fail('Could not save settings.');
+        }
 
-        return ok('Settings updated successfully.', toDTO(doc));
+        return ok(
+            'Settings updated successfully.',
+            toDTO(doc),
+        );
     } catch (error) {
         return handleError(error);
     }
