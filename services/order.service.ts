@@ -780,10 +780,10 @@ export async function updatePaymentStatus(
 }
 
 export async function getOrderByConfirmationToken(token: string): Promise<OrderDTO | null> {
-    // if (!token || token.length !== 64) {
-    //     return null;
-    // }
-    console.log(token)
+    if (!token || token.length !== 64) {
+        return null;
+    }
+ 
     const tokenHash = hashConfirmationToken(token);
 
     await connectDB();
