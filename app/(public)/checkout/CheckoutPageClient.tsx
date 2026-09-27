@@ -1,11 +1,23 @@
+
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
+
+import {
+    AlertCircle,
+    ArrowLeft,
+} from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
 
 import { checkoutSchema } from '@/lib/validation/order.schema';
+
 import { DEFAULT_CURRENCY } from '@/lib/constants';
 
 import { useCartStore } from '@/store/cart.store';
@@ -45,13 +57,11 @@ interface FieldErrors {
     name?: string;
     email?: string;
     phone?: string;
-
     address?: string;
     city?: string;
     state?: string;
     postalCode?: string;
     country?: string;
-
     paymentMethod?: string;
 }
 
@@ -103,9 +113,11 @@ export function CheckoutPageClient() {
         useState<FieldErrors>({});
 
     /*
-     * Re-validates cart against the database
-     * before showing checkout.
+     * =============================================================
+     * Load checkout summary
+     * =============================================================
      */
+
     useEffect(() => {
         let cancelled = false;
 
@@ -163,19 +175,28 @@ export function CheckoutPageClient() {
         };
     }, [cartItems]);
 
-    const hasUnavailableItems =
-        useMemo(() => {
-            if (!summary) return true;
+    /*
+     * =============================================================
+     * Availability
+     * =============================================================
+     */
 
-            return (
-                summary.removedProductIds.length >
-                    0 ||
-                summary.items.some(
-                    (item) =>
-                        !item.isActive,
-                )
-            );
-        }, [summary]);
+    const hasUnavailableItems = useMemo(() => {
+        if (!summary) return true;
+
+        return (
+            summary.removedProductIds.length > 0 ||
+            summary.items.some(
+                (item) => !item.isActive,
+            )
+        );
+    }, [summary]);
+
+    /*
+     * =============================================================
+     * Submit
+     * =============================================================
+     */
 
     const handleSubmit = async (
         event: React.FormEvent<HTMLFormElement>,
@@ -203,9 +224,10 @@ export function CheckoutPageClient() {
 
         /*
          * Client-side validation.
-         * This is only for showing field errors.
+         *
          * Server validates again.
          */
+
         const checkoutData = {
             customer: contact,
             shippingAddress,
@@ -312,13 +334,15 @@ export function CheckoutPageClient() {
 
         /*
          * Server receives only:
+         *
          * customer
          * shippingAddress
          * paymentMethod
          * cart item ids + quantities
          *
-         * No prices are trusted from client.
+         * Price is never trusted from client.
          */
+
         const result =
             await placeOrderAction({
                 ...parsed.data,
@@ -349,30 +373,33 @@ export function CheckoutPageClient() {
         clearCart();
 
         router.push(
-    `/order-confirmation/${result.data.confirmationToken}`,
-);
+            `/order-confirmation/${result.data.confirmationToken}`,
+        );
     };
 
     /*
+     * =============================================================
      * Empty cart
+     * =============================================================
      */
+
     if (cartItems.length === 0) {
         return (
-            <main className="bg-[#fff8f2]">
-                <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-                    <div className="rounded-3xl border border-orange-100 bg-white p-8 text-center shadow-2xl shadow-gray-50">
-                        <h1 className="font-serif text-3xl font-bold text-[#3b2419]">
+            <main className="min-h-screen bg-[#fff8f2]">
+                <div className="mx-auto flex min-h-[70vh] w-full max-w-3xl items-center px-3 py-10 sm:px-6 sm:py-16">
+                    <div className="w-full rounded-3xl border border-orange-100 bg-white p-6 text-center shadow-2xl shadow-gray-50 sm:p-8">
+                        <h1 className="font-serif text-2xl font-bold text-[#3b2419] sm:text-3xl">
                             Your cart is empty
                         </h1>
 
-                        <p className="mt-3 text-gray-500">
+                        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
                             Add some candles before
                             continuing to checkout.
                         </p>
 
                         <Link
                             href="/products"
-                            className="mt-6 inline-flex rounded-2xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600"
+                            className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 sm:w-auto"
                         >
                             Shop Candles
                         </Link>
@@ -382,48 +409,68 @@ export function CheckoutPageClient() {
         );
     }
 
+    /*
+     * =============================================================
+     * Main checkout page
+     * =============================================================
+     */
+
     return (
-        <main className="bg-[#fff8f2]">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-                {/* Header */}
-                <div className="mb-8">
+        <main className="min-h-screen bg-[#fff8f2]">
+            <div className="mx-auto w-full max-w-7xl px-3 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+
+                {/* =================================================
+                    Header
+                ================================================= */}
+
+                <div className="mb-6 sm:mb-8">
+
                     <Link
                         href="/cart"
                         className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-orange-600"
                     >
                         <ArrowLeft className="h-4 w-4" />
+
                         Back to Cart
                     </Link>
 
-                    <h1 className="mt-4 font-serif text-3xl font-bold text-[#3b2419] sm:text-4xl">
+                    <h1 className="mt-4 font-serif text-2xl font-bold leading-tight text-[#3b2419] sm:text-3xl md:text-4xl">
                         Checkout
                     </h1>
 
-                    <p className="mt-2 text-gray-500">
-                        Complete your details and
-                        place your order.
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500 sm:text-base">
+                        Complete your details and place
+                        your order.
                     </p>
                 </div>
 
-                {/* General error */}
+                {/* =================================================
+                    General Error
+                ================================================= */}
+
                 {error && (
-                    <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-3.5 text-sm text-red-700 sm:mb-6 sm:p-4">
                         <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
-                        <p>{error}</p>
+                        <p className="min-w-0 leading-5">
+                            {error}
+                        </p>
                     </div>
                 )}
 
-                {/* Unavailable products */}
+                {/* =================================================
+                    Unavailable products
+                ================================================= */}
+
                 {summary &&
                     hasUnavailableItems && (
-                        <div className="mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                        <div className="mb-5 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 sm:mb-6">
                             <p className="font-semibold">
                                 Some items are no longer
                                 available.
                             </p>
 
-                            <p className="mt-1">
+                            <p className="mt-1 leading-5">
                                 Please return to your cart
                                 and update it before placing
                                 the order.
@@ -438,20 +485,27 @@ export function CheckoutPageClient() {
                         </div>
                     )}
 
-                {/* Loading */}
+                {/* =================================================
+                    Loading
+                ================================================= */}
+
                 {loading ? (
-                    <div className="rounded-3xl border border-orange-100 bg-white p-10 text-center shadow-2xl shadow-gray-50">
-                        <p className="text-sm text-gray-500">
+                    <div className="rounded-3xl border border-orange-100 bg-white p-8 text-center shadow-2xl shadow-gray-50 sm:p-10">
+                        <p className="text-sm text-gray-500 sm:text-base">
                             Checking your cart...
                         </p>
                     </div>
                 ) : summary ? (
                     <form
                         onSubmit={handleSubmit}
-                        className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]"
+                        className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_380px]"
                     >
-                        {/* Left */}
-                        <div className="space-y-6">
+                        {/* =================================================
+                            Left
+                        ================================================= */}
+
+                        <div className="min-w-0 space-y-5 sm:space-y-6">
+
                             <ContactInformation
                                 value={contact}
                                 onChange={
@@ -496,47 +550,54 @@ export function CheckoutPageClient() {
                                     fieldErrors.paymentMethod
                                 }
                             />
+
                         </div>
 
-                        {/* Right */}
-                        <OrderSummary
-                            items={summary.items.map(
-                                (item) => ({
-                                    productId:
-                                        item.productId,
-                                    name: item.name,
-                                    image: item.image,
-                                    quantity:
-                                        item.quantity,
-                                    lineTotal:
-                                        item.lineTotal,
-                                }),
-                            )}
-                            subtotal={
-                                summary.subtotal
-                            }
-                            discountAmount={
-                                summary.discountAmount
-                            }
-                            shippingCost={
-                                summary.shippingCost
-                            }
-                            totalAmount={
-                                summary.totalAmount
-                            }
-                            currency={
-                                DEFAULT_CURRENCY
-                            }
-                            submitting={
-                                submitting
-                            }
-                            disabled={
-                                hasUnavailableItems
-                            }
-                        />
+                        {/* =================================================
+                            Right
+                        ================================================= */}
+
+                        <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+                            <OrderSummary
+                                items={summary.items.map(
+                                    (item) => ({
+                                        productId:
+                                            item.productId,
+                                        name: item.name,
+                                        image: item.image,
+                                        quantity:
+                                            item.quantity,
+                                        lineTotal:
+                                            item.lineTotal,
+                                    }),
+                                )}
+                                subtotal={
+                                    summary.subtotal
+                                }
+                                discountAmount={
+                                    summary.discountAmount
+                                }
+                                shippingCost={
+                                    summary.shippingCost
+                                }
+                                totalAmount={
+                                    summary.totalAmount
+                                }
+                                currency={
+                                    DEFAULT_CURRENCY
+                                }
+                                submitting={
+                                    submitting
+                                }
+                                disabled={
+                                    hasUnavailableItems
+                                }
+                            />
+                        </div>
                     </form>
                 ) : null}
             </div>
         </main>
     );
 }
+

@@ -36,6 +36,10 @@ import type {
 
 import { validateCartAction } from './action';
 
+import {
+    MAX_ITEM_QUANTITY,
+} from '@/lib/validation/cart.schema';
+
 type ValidationState = {
     data: CartValidationDTO | null;
     loading: boolean;
@@ -43,6 +47,20 @@ type ValidationState = {
 };
 
 export default function CartPageClient() {
+    /*
+     * =============================================================
+     * Zustand Cart State
+     * =============================================================
+     *
+     * Zustand/localStorage stores only the local cart state:
+     *
+     * productId
+     * quantity
+     *
+     * Product name, price, image, availability etc.
+     * come from the server validation response.
+     */
+
     const items = useCartStore(
         (state) => state.items,
     );
@@ -59,6 +77,12 @@ export default function CartPageClient() {
         (state) => state.clear,
     );
 
+    /*
+     * =============================================================
+     * Server Validation State
+     * =============================================================
+     */
+
     const [validation, setValidation] =
         useState<ValidationState>({
             data: null,
@@ -67,32 +91,131 @@ export default function CartPageClient() {
         });
 
     /*
-     * Re-check the local cart against the database.
+     * =============================================================
+     * Product IDs Key
+     * =============================================================
      *
-     * Zustand/localStorage contains only:
-     * productId + quantity
+     * IMPORTANT:
      *
-     * The database remains the source of truth
-     * for product name, price and availability.
+     * We DON'T want this effect to run when only quantity changes.
+     *
+     * Example:
+     *
+     * Before:
+     *
+     * productId: abc
+     * quantity: 1
+     *
+     * After:
+     *
+     * productId: abc
+     * quantity: 2
+     *
+     * `items` changes, but product IDs remain the same.
+     *
+     * Therefore this key remains the same:
+     *
+     * abc
+     *
+     * So the server validation effect does NOT run again.
+     *
+     * Validation WILL run when:
+     *
+     * - product is added
+     * - product is removed
      */
+
+    const productIdsKey = useMemo(() => {
+        return items
+            .map((item) => item.productId)
+            .sort()
+            .join(',');
+    }, [items]);
+
+    /*
+     * =============================================================
+     * Validate Cart
+     * =============================================================
+     *
+     * Database is the source of truth for:
+     *
+     * - product name
+     * - product image
+     * - product price
+     * - compareAtPrice
+     * - slug
+     * - active/inactive state
+     *
+     * But IMPORTANTLY:
+     *
+     * quantity is controlled locally by Zustand.
+     *
+     * Therefore quantity changes do NOT trigger this effect.
+     */
+
     useEffect(() => {
         let cancelled = false;
 
         async function validate() {
+            /*
+             * If cart is empty, there is nothing to validate.
+             */
+
+            const currentItems =
+                useCartStore.getState().items;
+
+            if (currentItems.length === 0) {
+                setValidation({
+                    data: null,
+                    loading: false,
+                    error: null,
+                });
+
+                return;
+            }
+
+            /*
+             * Show validation loading only when
+             * product IDs actually changed.
+             */
+
             setValidation((prev) => ({
                 ...prev,
                 loading: true,
                 error: null,
             }));
 
-            const result =
-                await validateCartAction(items);
+            /*
+             * Server validation
+             */
 
-            if (cancelled) return;
+            const result =
+                await validateCartAction(
+                    currentItems,
+                );
 
             /*
-             * Action failed
+             * Ignore outdated requests.
+             *
+             * Example:
+             *
+             * User removes item A,
+             * then quickly adds item B.
+             *
+             * An older request shouldn't overwrite
+             * a newer validation result.
              */
+
+            if (cancelled) {
+                return;
+            }
+
+            /*
+             * =====================================================
+             * Action Failed
+             * =====================================================
+             */
+
             if (!result.success) {
                 setValidation({
                     data: null,
@@ -104,10 +227,17 @@ export default function CartPageClient() {
             }
 
             /*
-             * Action succeeded, but data is optional
-             * in ActionResult, so explicitly guard it.
+             * =====================================================
+             * Action Success
+             * =====================================================
              */
+
             const data = result.data;
+
+            /*
+             * ActionResult data can be optional,
+             * therefore explicitly guard it.
+             */
 
             if (!data) {
                 setValidation({
@@ -121,25 +251,43 @@ export default function CartPageClient() {
             }
 
             /*
-             * Products that no longer exist.
+             * =====================================================
+             * Removed Products
+             * =====================================================
              *
-             * Remove them from Zustand/localStorage.
+             * Products that no longer exist in database
+             * are removed from Zustand/localStorage.
              */
+
             if (
                 data.removedProductIds.length > 0
             ) {
-                for (const productId of
-                    data.removedProductIds) {
-                    removeItem(productId);
+                for (
+                    const productId of
+                    data.removedProductIds
+                ) {
+                    useCartStore
+                        .getState()
+                        .removeItem(productId);
                 }
 
+                /*
+                 * Notify the user.
+                 */
+
                 toast.error(
-                    data.removedProductIds.length ===
-                        1
+                    data.removedProductIds
+                        .length === 1
                         ? 'A product was removed from your cart because it is no longer available.'
                         : 'Some products were removed from your cart because they are no longer available.',
                 );
             }
+
+            /*
+             * =====================================================
+             * Store Validation Result
+             * =====================================================
+             */
 
             setValidation({
                 data,
@@ -153,52 +301,147 @@ export default function CartPageClient() {
         return () => {
             cancelled = true;
         };
-    }, [items, removeItem]);
+
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT use:
+         *
+         * [items, removeItem]
+         *
+         * because changing quantity changes `items`.
+         *
+         * We only want validation when product IDs change.
+         */
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [productIdsKey]);
 
     /*
-     * Current validated products
+     * =============================================================
+     * Server Validated Items
+     * =============================================================
      */
+
     const validatedItems =
         validation.data?.items ?? [];
 
     /*
-     * Active products
+     * =============================================================
+     * Merge Server Product Data + Local Quantity
+     * =============================================================
+     *
+     * This is another IMPORTANT fix.
+     *
+     * Previously:
+     *
+     * CartItemCard received:
+     *
+     * validation.data.items
+     *
+     * Therefore when quantity changed locally,
+     * the card still displayed the old server quantity
+     * until the next validation request completed.
+     *
+     * Now:
+     *
+     * - name/image/price/slug/isActive -> server
+     * - quantity -> Zustand/local state
+     * - lineTotal -> recalculated locally
+     *
+     * Result:
+     *
+     * Click +
+     *      ↓
+     * Zustand quantity changes
+     *      ↓
+     * React rerenders immediately
+     *      ↓
+     * Card shows new quantity immediately
+     *      ↓
+     * NO server call
      */
+
+    const currentValidatedItems =
+        useMemo(() => {
+            /*
+             * Create a fast lookup map for local cart items.
+             */
+
+            const localQuantityMap =
+                new Map(
+                    items.map((item) => [
+                        item.productId,
+                        item.quantity,
+                    ]),
+                );
+
+            /*
+             * Keep only products that still exist
+             * in the local cart.
+             *
+             * This makes remove action instant.
+             */
+
+            return validatedItems
+                .filter((item) =>
+                    localQuantityMap.has(
+                        item.productId,
+                    ),
+                )
+                .map((item) => {
+                    const quantity =
+                        localQuantityMap.get(
+                            item.productId,
+                        ) ?? item.quantity;
+
+                    return {
+                        ...item,
+                        quantity,
+                        lineTotal:
+                            item.price * quantity,
+                    };
+                });
+        }, [validatedItems, items]);
+
+    /*
+     * =============================================================
+     * Active Products
+     * =============================================================
+     */
+
     const activeItems = useMemo(
         () =>
-            validatedItems.filter(
+            currentValidatedItems.filter(
                 (item) => item.isActive,
             ),
-        [validatedItems],
+        [currentValidatedItems],
     );
 
     /*
-     * Products that still exist but
-     * are currently inactive.
+     * =============================================================
+     * Unavailable Products
+     * =============================================================
+     *
+     * Product exists but is inactive.
      */
+
     const unavailableItems = useMemo(
         () =>
-            validatedItems.filter(
+            currentValidatedItems.filter(
                 (item) => !item.isActive,
             ),
-        [validatedItems],
+        [currentValidatedItems],
     );
 
     /*
-     * Checkout is allowed only when:
+     * =============================================================
+     * Item Count
+     * =============================================================
      *
-     * 1. validation finished
-     * 2. there is at least one active item
-     * 3. no inactive item remains
+     * Only active products count toward checkout.
      */
-    const canCheckout =
-        !validation.loading &&
-        activeItems.length > 0 &&
-        unavailableItems.length === 0;
 
-    /*
-     * Total quantity of active products
-     */
     const itemCount = useMemo(
         () =>
             activeItems.reduce(
@@ -209,39 +452,175 @@ export default function CartPageClient() {
         [activeItems],
     );
 
+    /*
+     * =============================================================
+     * Subtotal
+     * =============================================================
+     *
+     * IMPORTANT:
+     *
+     * Don't use:
+     *
+     * validation.data.subtotal
+     *
+     * because that subtotal belongs to the OLD
+     * server validation quantity.
+     *
+     * Instead calculate from current local quantity.
+     *
+     * This means:
+     *
+     * quantity 1 -> quantity 2
+     *
+     * subtotal updates immediately.
+     */
+
+    const subtotal = useMemo(
+        () =>
+            activeItems.reduce(
+                (total, item) =>
+                    total + item.lineTotal,
+                0,
+            ),
+        [activeItems],
+    );
+
+    /*
+     * =============================================================
+     * Checkout Permission
+     * =============================================================
+     *
+     * Checkout is allowed only when:
+     *
+     * 1. validation finished
+     * 2. at least one active item exists
+     * 3. no unavailable item remains
+     */
+
+    const canCheckout =
+        !validation.loading &&
+        activeItems.length > 0 &&
+        unavailableItems.length === 0;
+
+    /*
+     * =============================================================
+     * Increase Quantity
+     * =============================================================
+     */
+
     const handleIncrease = (
         productId: string,
         quantity: number,
     ) => {
+        /*
+         * Stop the increase when maximum quantity
+         * has already been reached.
+         */
+
+        if (
+            quantity >=
+            MAX_ITEM_QUANTITY
+        ) {
+            toast.warning(
+                `You can only add up to ${MAX_ITEM_QUANTITY} items per product.`,
+            );
+
+            return;
+        }
+
+        /*
+         * IMPORTANT:
+         *
+         * This only updates Zustand.
+         *
+         * No server request.
+         * No validation loading.
+         * No item flicker.
+         */
+
         setQuantity(
             productId,
             quantity + 1,
         );
     };
 
+    /*
+     * =============================================================
+     * Decrease Quantity
+     * =============================================================
+     */
+
     const handleDecrease = (
         productId: string,
         quantity: number,
     ) => {
+        /*
+         * Quantity must never go below 1.
+         *
+         * If user wants to remove the product,
+         * they can use the trash/remove button.
+         */
+
+        if (quantity <= 1) {
+            return;
+        }
+
+        /*
+         * Local Zustand update only.
+         *
+         * No server call.
+         */
+
         setQuantity(
             productId,
             quantity - 1,
         );
     };
 
+    /*
+     * =============================================================
+     * Remove Item
+     * =============================================================
+     */
+
     const handleRemove = (
         productId: string,
         productName: string,
     ) => {
+        /*
+         * Remove locally first.
+         *
+         * This makes the UI instant.
+         */
+
         removeItem(productId);
+
+        /*
+         * Product ID list will change,
+         * which automatically triggers server validation.
+         */
 
         toast.success(
             `${productName} removed from cart.`,
         );
     };
 
+    /*
+     * =============================================================
+     * Clear Cart
+     * =============================================================
+     */
+
     const handleClear = () => {
+        /*
+         * Clear local cart immediately.
+         */
+
         clear();
+
+        /*
+         * Empty-cart UI will be shown immediately.
+         */
 
         toast.success(
             'Your cart has been cleared.',
@@ -249,16 +628,20 @@ export default function CartPageClient() {
     };
 
     /*
-     * Empty cart
+     * =============================================================
+     * Empty Cart
+     * =============================================================
      */
+
     if (
         !validation.loading &&
         items.length === 0
     ) {
         return (
-            <main className="min-h-[70vh] bg-[#fff8f2]">
+            <main className="min-h-[70vh] ">
                 <div className="mx-auto flex min-h-[70vh] max-w-3xl items-center justify-center px-4 py-16 sm:px-6">
                     <div className="w-full rounded-[2rem] border border-orange-100 bg-white px-6 py-14 text-center shadow-2xl shadow-gray-50 sm:px-10">
+
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
                             <ShoppingBag
                                 className="h-7 w-7"
@@ -284,20 +667,29 @@ export default function CartPageClient() {
 
                             <ArrowRight className="h-4 w-4" />
                         </Link>
+
                     </div>
                 </div>
             </main>
         );
     }
 
+    /*
+     * =============================================================
+     * Main Cart Page
+     * =============================================================
+     */
+
     return (
         <main className="min-h-screen bg-[#fff8f2] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
             <div className="mx-auto max-w-7xl">
-                {/* ================================================= */}
-                {/* Header */}
-                {/* ================================================= */}
+
+                {/* =================================================
+                    Header
+                ================================================= */}
 
                 <div className="mb-8">
+
                     <Link
                         href="/products"
                         className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-chocolate-soft transition hover:text-orange-600"
@@ -308,7 +700,9 @@ export default function CartPageClient() {
                     </Link>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
                         <div>
+
                             <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
                                 Shopping Cart
                             </p>
@@ -327,6 +721,7 @@ export default function CartPageClient() {
                                               : 'items'
                                       } ready for checkout`}
                             </p>
+
                         </div>
 
                         {items.length > 0 ? (
@@ -343,18 +738,21 @@ export default function CartPageClient() {
                                 Clear Cart
                             </button>
                         ) : null}
+
                     </div>
                 </div>
 
-                {/* ================================================= */}
-                {/* Validation Error */}
-                {/* ================================================= */}
+                {/* =================================================
+                    Validation Error
+                ================================================= */}
 
                 {validation.error ? (
                     <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-red-700">
+
                         <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                         <div>
+
                             <p className="text-sm font-semibold">
                                 Couldn&apos;t validate your cart
                             </p>
@@ -362,34 +760,43 @@ export default function CartPageClient() {
                             <p className="mt-1 text-xs leading-5">
                                 {validation.error}
                             </p>
+
                         </div>
+
                     </div>
                 ) : null}
 
-                {/* ================================================= */}
-                {/* Loading */}
-                {/* ================================================= */}
+                {/* =================================================
+                    Validation Loading
+                ================================================= */}
 
                 {validation.loading ? (
                     <div className="mb-6 flex items-center gap-3 rounded-2xl border border-orange-100 bg-white px-5 py-4 text-sm text-chocolate-soft shadow-2xl shadow-gray-50">
+
                         <RefreshCw className="h-4 w-4 animate-spin text-orange-500" />
 
                         Checking latest product prices and
                         availability...
+
                     </div>
                 ) : null}
 
-                {/* ================================================= */}
-                {/* Main Grid */}
-                {/* ================================================= */}
+                {/* =================================================
+                    Main Grid
+                ================================================= */}
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-                    {/* ================================================= */}
-                    {/* Cart Items */}
-                    {/* ================================================= */}
+
+                    {/* =================================================
+                        Cart Items
+                    ================================================= */}
 
                     <section className="space-y-4">
-                        {/* Unavailable products */}
+
+                        {/* =================================================
+                            Unavailable Products
+                        ================================================= */}
+
                         {unavailableItems.map(
                             (item) => (
                                 <CartItemCard
@@ -418,7 +825,10 @@ export default function CartPageClient() {
                             ),
                         )}
 
-                        {/* Active products */}
+                        {/* =================================================
+                            Active Products
+                        ================================================= */}
+
                         {activeItems.map(
                             (item) => (
                                 <CartItemCard
@@ -446,14 +856,20 @@ export default function CartPageClient() {
                             ),
                         )}
 
-                        {/* Nothing available */}
+                        {/* =================================================
+                            Nothing Available
+                        ================================================= */}
+
                         {!validation.loading &&
-                        validatedItems.length ===
+                        currentValidatedItems.length ===
                             0 &&
                         items.length > 0 ? (
                             <div className="rounded-3xl border border-orange-100 bg-white px-6 py-16 text-center shadow-2xl shadow-gray-50">
+
                                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+
                                     <ShoppingBag className="h-6 w-6" />
+
                                 </div>
 
                                 <h2 className="mt-5 font-serif text-xl text-chocolate">
@@ -473,17 +889,26 @@ export default function CartPageClient() {
 
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
+
                             </div>
                         ) : null}
+
                     </section>
 
-                    {/* ================================================= */}
-                    {/* Summary */}
-                    {/* ================================================= */}
+                    {/* =================================================
+                        Summary
+                    ================================================= */}
 
                     <aside className="lg:sticky lg:top-24 lg:self-start">
+
                         <div className="rounded-3xl border border-orange-100 bg-white p-6 shadow-2xl shadow-gray-50">
+
+                            {/* =================================================
+                                Summary Header
+                            ================================================= */}
+
                             <div className="mb-6">
+
                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-orange-600">
                                     Order Summary
                                 </p>
@@ -491,10 +916,19 @@ export default function CartPageClient() {
                                 <h2 className="mt-2 font-serif text-2xl text-chocolate">
                                     Cart Total
                                 </h2>
+
                             </div>
 
+                            {/* =================================================
+                                Summary Values
+                            ================================================= */}
+
                             <div className="space-y-4">
+
+                                {/* Items */}
+
                                 <div className="flex items-center justify-between text-sm">
+
                                     <span className="text-chocolate-soft">
                                         Items
                                     </span>
@@ -502,48 +936,69 @@ export default function CartPageClient() {
                                     <span className="font-semibold text-chocolate">
                                         {itemCount}
                                     </span>
+
                                 </div>
 
+                                {/* Subtotal */}
+
                                 <div className="flex items-center justify-between text-sm">
+
                                     <span className="text-chocolate-soft">
                                         Subtotal
                                     </span>
 
                                     <span className="font-semibold text-chocolate">
+
                                         {validation.data
                                             ? formatPrice(
-                                                  validation.data
-                                                      .subtotal,
+                                                  subtotal,
                                               )
                                             : '--'}
+
                                     </span>
+
                                 </div>
 
+                                {/* Total */}
+
                                 <div className="border-t border-orange-100 pt-4">
+
                                     <div className="flex items-end justify-between">
+
                                         <div>
+
                                             <p className="text-xs font-medium uppercase tracking-wide text-chocolate-muted">
                                                 Total
                                             </p>
 
                                             <p className="mt-1 text-2xl font-bold text-chocolate">
+
                                                 {validation.data
                                                     ? formatPrice(
-                                                          validation.data
-                                                              .subtotal,
+                                                          subtotal,
                                                       )
                                                     : '--'}
+
                                             </p>
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </div>
 
-                            {/* Unavailable Warning */}
+                            {/* =================================================
+                                Unavailable Warning
+                            ================================================= */}
+
                             {unavailableItems.length >
                             0 ? (
                                 <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+
                                     <div className="flex items-start gap-2">
+
                                         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
 
                                         <p className="text-xs leading-5 text-amber-700">
@@ -551,11 +1006,16 @@ export default function CartPageClient() {
                                             before proceeding to
                                             checkout.
                                         </p>
+
                                     </div>
+
                                 </div>
                             ) : null}
 
-                            {/* Checkout */}
+                            {/* =================================================
+                                Checkout
+                            ================================================= */}
+
                             <Link
                                 href={
                                     canCheckout
@@ -587,17 +1047,20 @@ export default function CartPageClient() {
                                 Shipping and final order totals are
                                 calculated again during checkout.
                             </p>
+
                         </div>
                     </aside>
+
                 </div>
             </div>
         </main>
     );
 }
 
-/* =============================================================== */
-/* Cart Item Card                                                   */
-/* =============================================================== */
+/* ===============================================================
+   Cart Item Card
+================================================================ */
+
 function CartItemCard({
     item,
     unavailable = false,
@@ -611,6 +1074,10 @@ function CartItemCard({
     onIncrease: () => void;
     onDecrease: () => void;
 }) {
+    /*
+     * Determine whether this product has a discount.
+     */
+
     const discounted = hasDiscount(
         item.price,
         item.compareAtPrice,
@@ -624,20 +1091,38 @@ function CartItemCard({
                     : 'border-orange-100'
             }`}
         >
+
+            {/* =====================================================
+                Unavailable Banner
+            ===================================================== */}
+
             {unavailable ? (
                 <div className="mb-4 flex items-center gap-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+
                     <AlertCircle className="h-4 w-4 shrink-0" />
+
                     This product is currently unavailable.
+
                 </div>
             ) : null}
 
+            {/* =====================================================
+                Main Item Row
+            ===================================================== */}
+
             <div className="flex gap-4">
-                {/* Image */}
+
+                {/* =================================================
+                    Product Image
+                ================================================= */}
+
                 <Link
                     href={`/products/${item.slug}`}
                     className="shrink-0"
                 >
+
                     <div className="relative h-24 w-24 overflow-hidden rounded-2xl border border-orange-100 bg-[#fff7f0] sm:h-28 sm:w-28">
+
                         {item.image ? (
                             <Image
                                 src={item.image}
@@ -651,12 +1136,23 @@ function CartItemCard({
                                 No image
                             </div>
                         )}
+
                     </div>
+
                 </Link>
 
-                {/* Content */}
+                {/* =================================================
+                    Content
+                ================================================= */}
+
                 <div className="min-w-0 flex-1">
+
+                    {/* =================================================
+                        Name + Remove
+                    ================================================= */}
+
                     <div className="flex items-start justify-between gap-2">
+
                         <Link
                             href={`/products/${item.slug}`}
                             className="min-w-0"
@@ -674,13 +1170,20 @@ function CartItemCard({
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
+
                     </div>
 
-                    {/* Price */}
+                    {/* =================================================
+                        Price
+                    ================================================= */}
+
                     {discounted ? (
                         <div className="mt-2 flex flex-wrap items-center gap-2">
+
                             <span className="text-sm font-bold text-chocolate">
-                                {formatPrice(item.price)}
+                                {formatPrice(
+                                    item.price,
+                                )}
                             </span>
 
                             <span className="text-xs text-chocolate-muted line-through">
@@ -692,53 +1195,99 @@ function CartItemCard({
                             <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-600">
                                 Sale
                             </span>
+
                         </div>
                     ) : (
                         <p className="mt-2 text-sm font-bold text-chocolate">
-                            {formatPrice(item.price)}
+                            {formatPrice(
+                                item.price,
+                            )}
                         </p>
                     )}
 
-                    {/* Quantity + Total */}
+                    {/* =================================================
+                        Quantity + Total
+                    ================================================= */}
+
                     <div className="mt-5 flex items-end justify-between gap-3">
+
+                        {/* =================================================
+                            Quantity
+                        ================================================= */}
+
                         <div>
+
                             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-chocolate-muted">
                                 Quantity
                             </p>
 
                             <div className="inline-flex items-center rounded-xl border border-orange-100 bg-[#fffaf6]">
+
+                                {/* =========================================
+                                    Decrease
+                                ========================================== */}
+
                                 <button
                                     type="button"
-                                    onClick={onDecrease}
-                                    className="flex h-8 w-8 items-center justify-center text-chocolate-soft transition hover:bg-orange-50"
+                                    onClick={
+                                        onDecrease
+                                    }
+                                    disabled={
+                                        item.quantity <=
+                                        1
+                                    }
+                                    className="flex h-8 w-8 items-center justify-center text-chocolate-soft transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                    aria-label="Decrease quantity"
                                 >
                                     <Minus className="h-3.5 w-3.5" />
                                 </button>
+
+                                {/* =========================================
+                                    Quantity Value
+                                ========================================== */}
 
                                 <span className="flex h-8 min-w-9 items-center justify-center border-x border-orange-100 px-2 text-sm font-bold text-chocolate">
                                     {item.quantity}
                                 </span>
 
+                                {/* =========================================
+                                    Increase
+                                ========================================== */}
+
                                 <button
                                     type="button"
-                                    onClick={onIncrease}
+                                    onClick={
+                                        onIncrease
+                                    }
                                     className="flex h-8 w-8 items-center justify-center text-chocolate-soft transition hover:bg-orange-50"
+                                    aria-label="Increase quantity"
                                 >
                                     <Plus className="h-3.5 w-3.5" />
                                 </button>
+
                             </div>
                         </div>
 
+                        {/* =================================================
+                            Line Total
+                        ================================================= */}
+
                         <div className="text-right">
+
                             <p className="text-[10px] font-semibold uppercase tracking-wide text-chocolate-muted">
                                 Total
                             </p>
 
                             <p className="mt-1 text-lg font-bold text-chocolate">
-                                {formatPrice(item.lineTotal)}
+                                {formatPrice(
+                                    item.lineTotal,
+                                )}
                             </p>
+
                         </div>
+
                     </div>
+
                 </div>
             </div>
         </article>

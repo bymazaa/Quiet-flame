@@ -75,7 +75,7 @@ export function ProductActions({
                     {isPending && pendingAction === 'toggle' ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={1.75} />
                     ) : null}
-                    {isActive ? 'Disable' : 'Enable'}
+                    {isActive ? 'Hide ' : 'Show'}
                 </button>
 
                 <Link
@@ -105,13 +105,13 @@ export function ProductActions({
 
             <ConfirmModal
                 open={isToggleOpen}
-                title={isActive ? `Disable "${name}"?` : `Enable "${name}"?`}
+                title={isActive ? `Hide "${name}"?` : `Show "${name}"?`}
                 description={
                     isActive
                         ? 'Customers will no longer be able to see or purchase this product.'
                         : 'This product will become visible and purchasable in the store.'
                 }
-                confirmLabel={isActive ? 'Disable' : 'Enable'}
+                confirmLabel={isActive ? 'Hide' : 'Show'}
                 cancelLabel="Cancel"
                 isConfirming={isPending && pendingAction === 'toggle'}
                 variant={isActive ? 'danger' : 'default'}

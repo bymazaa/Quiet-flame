@@ -21,7 +21,7 @@ import {
 
 import { getOrderById } from '@/services/order.service';
 
-import { formatDate, formatPrice } from '@/lib/utils';
+import { formatDate, formatDateTime, formatPrice } from '@/lib/utils';
 import { PrintOrderButton } from '@/app/components/admin/PrintButton';
 
 export const metadata: Metadata = {
@@ -172,7 +172,7 @@ export default async function OrderDetailsPage({
 
                         <p className="mt-2 text-sm text-chocolate-soft">
                             Placed on{' '}
-                            {formatDate(order.createdAt)}
+                             {formatDateTime(order.createdAt)}
                         </p>
                     </div>
 
