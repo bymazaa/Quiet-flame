@@ -33,7 +33,7 @@ export const shippingAddressSchema = z.object({
     address: z
         .string()
         .trim()
-        .min(5, 'Enter your street address')
+        .min(2, 'Enter your street address')
         .max(200, 'Address is too long'),
 
     city: z
