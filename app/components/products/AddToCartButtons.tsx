@@ -64,28 +64,25 @@ export function AddToCartButtons({
         <div
             className={cn(
                 'flex w-full gap-2',
-                isStack
+                layout === 'stack'
                     ? 'flex-col'
-                    : 'flex-col lg:flex-row',
+                    : 'flex-col sm:flex-row',
             )}
         >
             {/* Add to Cart */}
+
             <button
                 type="button"
                 onClick={handleAddToCart}
                 className={buttonVariants({
                     variant: 'secondary',
+
                     size: isStack
                         ? 'lg'
                         : 'sm',
-                    className: cn(
-                        'w-full cursor-pointer gap-1.5',
-                        'border-orange-200 bg-white',
-                        'shadow-2xl shadow-gray-50',
-                        'hover:bg-orange-50',
-                        !isStack &&
-                            'lg:flex-1',
-                    ),
+
+                    className:
+                        'w-full cursor-pointer gap-1 border-orange-200 bg-white shadow-2xl shadow-gray-50 hover:bg-orange-50',
                 })}
             >
                 <ShoppingBag
@@ -93,12 +90,11 @@ export function AddToCartButtons({
                     strokeWidth={1.75}
                 />
 
-                <span className="truncate">
-                    Add to Cart
-                </span>
+                Add to Cart
             </button>
 
             {/* Buy Now */}
+
             <button
                 type="button"
                 onClick={handleBuyNow}
@@ -106,14 +102,9 @@ export function AddToCartButtons({
                     size: isStack
                         ? 'lg'
                         : 'sm',
-                    className: cn(
-                        'w-full cursor-pointer gap-1.5',
-                        'bg-orange-500',
-                        'shadow-lg shadow-orange-100',
-                        'hover:bg-orange-600',
-                        !isStack &&
-                            'lg:flex-1',
-                    ),
+
+                    className:
+                        'w-full md:w-[85%] cursor-pointer gap-1.5 bg-orange-500 shadow-lg shadow-orange-100 hover:bg-orange-600',
                 })}
             >
                 <Zap
@@ -122,9 +113,7 @@ export function AddToCartButtons({
                     strokeWidth={1.6}
                 />
 
-                <span className="truncate">
-                    Buy Now
-                </span>
+                Buy Now
             </button>
         </div>
     );

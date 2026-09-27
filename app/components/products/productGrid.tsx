@@ -85,7 +85,7 @@ export function ProductGrid({
                 Products
             ===================================================== */}
 
-            <div className="grid min-w-0 grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:gap-6 lg:grid-cols-4">
+            <div className="grid min-w-0 grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:gap-5 lg:grid-cols-4">
 
                 {products.map((product) => (
                     <div

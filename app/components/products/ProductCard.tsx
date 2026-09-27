@@ -21,7 +21,7 @@ export function ProductCard({
         product.compareAtPrice > product.price;
 
     return (
-        <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-2xl shadow-gray-50 transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl">
+        <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-2xl shadow-gray-50 transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl">
 
             {/* =========================================================
                 Product Image
