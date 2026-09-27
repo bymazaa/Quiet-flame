@@ -429,9 +429,9 @@ export function PrintInvoice({
                                     </p>
                                 </div>
 
-                                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-orange-600">
+                                {/* <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-orange-600">
                                     {order.currency}
-                                </span>
+                                </span> */}
                             </div>
                         </div>
                     </div>

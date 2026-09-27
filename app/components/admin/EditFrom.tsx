@@ -869,61 +869,59 @@ export default function EditProductForm({
 
                         {/* Publish Settings */}
 
-                        <section className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm sm:p-5">
-                            <h2 className="text-base font-semibold text-chocolate">
-                                Publish Settings
-                            </h2>
+                      <section className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm sm:p-5">
+    <h2 className="text-base font-semibold text-chocolate">
+        Publish Settings
+    </h2>
 
-                            <p className="mt-1 text-xs leading-5 text-chocolate-muted">
-                                Control product visibility.
-                            </p>
+    <p className="mt-1 text-xs leading-5 text-chocolate-muted">
+        Control product visibility.
+    </p>
 
-                            <div className="mt-4 flex items-center justify-between gap-4 rounded-xl bg-slate-50 p-3.5">
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-800">
-                                        Product visibility
-                                    </p>
+    <div className="mt-4 flex items-center justify-between gap-4 rounded-xl bg-slate-50 p-4">
+        <div className="min-w-0">
+            <p className="text-sm font-semibold text-slate-800">
+                Product visibility
+            </p>
 
-                                    <p className="mt-1 text-xs text-slate-500">
-                                        {form.isActive
-                                            ? 'Visible to customers'
-                                            : 'Hidden from customers'}
-                                    </p>
-                                </div>
+            <p className="mt-1 text-xs text-slate-500">
+                {form.isActive
+                    ? 'Visible to customers'
+                    : 'Hidden from customers'}
+            </p>
+        </div>
 
-                                <button
-                                    type="button"
-                                    disabled={isPending}
-                                    onClick={() =>
-                                        updateField(
-                                            'isActive',
-                                            !form.isActive,
-                                        )
-                                    }
-                                    aria-label={
-                                        form.isActive
-                                            ? 'Disable product'
-                                            : 'Enable product'
-                                    }
-                                    aria-pressed={
-                                        form.isActive
-                                    }
-                                    className={`relative h-7 w-12 shrink-0 cursor-pointer rounded-full transition-colors ${
-                                        form.isActive
-                                            ? 'bg-orange-500'
-                                            : 'bg-slate-300'
-                                    } disabled:cursor-not-allowed disabled:opacity-60`}
-                                >
-                                    <span
-                                        className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                                            form.isActive
-                                                ? 'translate-x-6'
-                                                : 'translate-x-1'
-                                        }`}
-                                    />
-                                </button>
-                            </div>
-                        </section>
+        <button
+            type="button"
+            disabled={isPending}
+            onClick={() =>
+                updateField(
+                    'isActive',
+                    !form.isActive,
+                )
+            }
+            aria-label={
+                form.isActive
+                    ? 'Disable product'
+                    : 'Enable product'
+            }
+            aria-pressed={form.isActive}
+            className={`relative h-8 w-14 shrink-0 cursor-pointer rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 ${
+                form.isActive
+                    ? 'bg-orange-500'
+                    : 'bg-slate-300'
+            } disabled:cursor-not-allowed disabled:opacity-60`}
+        >
+            <span
+                className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    form.isActive
+                        ? 'translate-x-6'
+                        : 'translate-x-0'
+                }`}
+            />
+        </button>
+    </div>
+</section>
 
                         {/* Product URL */}
 

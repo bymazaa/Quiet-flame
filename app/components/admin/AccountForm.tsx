@@ -1,8 +1,12 @@
-
 'use client';
 
-import { changePassword, updateProfile } from '@/app/admin/(dashboard)/account/action';
+import {
+    changePassword,
+    updateProfile,
+} from '@/app/admin/(dashboard)/account/action';
+
 import { useRouter } from 'next/navigation';
+
 import {
     CheckCircle2,
     KeyRound,
@@ -12,12 +16,14 @@ import {
     ShieldCheck,
     UserRound,
 } from 'lucide-react';
+
 import {
     useState,
     useTransition,
     type FormEvent,
     type ReactNode,
 } from 'react';
+
 import { toast } from 'sonner';
 
 interface AccountFormProps {
@@ -51,15 +57,17 @@ export default function AccountForm({
 }: AccountFormProps) {
     const router = useRouter();
 
-    const [profile, setProfile] = useState<ProfileForm>({
-        name: initialAdmin.name,
-        email: initialAdmin.email,
-    });
+    const [profile, setProfile] =
+        useState<ProfileForm>({
+            name: initialAdmin.name,
+            email: initialAdmin.email,
+        });
 
-    const [password, setPassword] = useState<PasswordForm>({
-        currentPassword: '',
-        newPassword: '',
-    });
+    const [password, setPassword] =
+        useState<PasswordForm>({
+            currentPassword: '',
+            newPassword: '',
+        });
 
     const [profileErrors, setProfileErrors] =
         useState<FieldErrors>({});
@@ -108,7 +116,9 @@ export default function AccountForm({
     function extractErrors(
         result: ActionResultWithErrors,
     ): FieldErrors {
-        if (!result.errors) return {};
+        if (!result.errors) {
+            return {};
+        }
 
         return Object.fromEntries(
             Object.entries(result.errors).map(
@@ -126,19 +136,22 @@ export default function AccountForm({
         event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault();
+
         setProfileErrors({});
 
         startProfileTransition(async () => {
-            const result = (await updateProfile(
-                initialAdmin.email,
-                {
-                    name: profile.name,
-                    email: initialAdmin.email,
-                },
-            )) as ActionResultWithErrors;
+            const result =
+                (await updateProfile(
+                    initialAdmin.email,
+                    {
+                        name: profile.name,
+                        email: initialAdmin.email,
+                    },
+                )) as ActionResultWithErrors;
 
             if (!result.success) {
-                const errors = extractErrors(result);
+                const errors =
+                    extractErrors(result);
 
                 setProfileErrors(errors);
 
@@ -169,6 +182,7 @@ export default function AccountForm({
         event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault();
+
         setPasswordErrors({});
 
         if (!password.currentPassword.trim()) {
@@ -190,13 +204,15 @@ export default function AccountForm({
         }
 
         startPasswordTransition(async () => {
-            const result = (await changePassword(
-                initialAdmin.email,
-                password,
-            )) as ActionResultWithErrors;
+            const result =
+                (await changePassword(
+                    initialAdmin.email,
+                    password,
+                )) as ActionResultWithErrors;
 
             if (!result.success) {
-                const errors = extractErrors(result);
+                const errors =
+                    extractErrors(result);
 
                 setPasswordErrors(errors);
 
@@ -227,114 +243,156 @@ export default function AccountForm({
     }
 
     const initials =
-        profile.name.trim().charAt(0).toUpperCase() || 'A';
+        profile.name
+            .trim()
+            .charAt(0)
+            .toUpperCase() || 'A';
 
     return (
-        <div className="space-y-6">
-            {/* Main account card */}
-            <div className="overflow-hidden rounded-2xl border border-amber-200/70 bg-white shadow-[0_10px_35px_rgba(108,78,48,0.07)]">
+        <div className="w-full max-w-6xl">
+            <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
+                {/* =====================================================
+                    Header
+                ===================================================== */}
 
-                {/* Header */}
-                <div className="border-b border-amber-100 bg-gradient-to-r from-amber-50/90 via-[#fff8f0] to-white px-6 py-7 sm:px-8 lg:px-10">
-                    <div className="flex items-center justify-between gap-5">
-                        <div className="flex min-w-0 items-center gap-4">
-                            {/* Avatar */}
-                            <div className="flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-white text-xl font-semibold text-amber-700 shadow-sm">
+                <header className="border-b border-orange-100 bg-[#fffaf6] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex min-w-0 items-center gap-3.5">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-200/70 bg-amber-50 text-lg font-bold text-amber-700 sm:h-14 sm:w-14 sm:text-xl">
                                 {initials}
                             </div>
 
                             <div className="min-w-0">
-                                <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-white/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">
+                                <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-700">
                                     <UserRound className="h-3 w-3" />
                                     Admin account
                                 </div>
 
-                                <h1 className="truncate text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-                                    {profile.name || 'Admin account'}
+                                <h1 className="truncate text-lg font-semibold tracking-tight text-chocolate sm:text-xl">
+                                    {profile.name ||
+                                        'Admin account'}
                                 </h1>
 
-                                <p className="mt-1 truncate text-[13px] text-slate-500">
+                                <p className="mt-0.5 truncate text-xs text-chocolate-muted sm:text-sm">
                                     {profile.email}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-200/70 bg-white/70 text-amber-600 shadow-sm sm:flex">
-                            <ShieldCheck className="h-[18px] w-[18px]" />
+                        <div className="flex w-fit items-center gap-2 rounded-xl border border-amber-200/70 bg-white px-3 py-2.5 shadow-sm">
+                            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+
+                            <div>
+                                <p className="text-[10px] font-medium uppercase tracking-wide text-chocolate-muted">
+                                    Security
+                                </p>
+
+                                <p className="text-xs font-semibold text-chocolate">
+                                    Protected account
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </header>
 
-                {/* Profile */}
+                {/* =====================================================
+                    Profile
+                ===================================================== */}
+
                 <AccountSection
-                    icon={<UserRound className="h-[17px] w-[17px]" />}
+                    icon={
+                        <UserRound className="h-4 w-4" />
+                    }
                     title="Profile information"
                     description="Update the name associated with your admin account."
                 >
                     <form
-                        onSubmit={handleProfileSubmit}
+                        onSubmit={
+                            handleProfileSubmit
+                        }
                         noValidate
                         className="space-y-5"
                     >
-                        {/* Name */}
-                        <Field
-                            label="Name"
-                            htmlFor="admin-name"
-                            error={profileErrors.name}
-                        >
-                            <div className="relative">
-                                <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <div className="grid gap-5 sm:grid-cols-2">
+                            {/* Name */}
 
-                                <input
-                                    id="admin-name"
-                                    name="name"
-                                    type="text"
-                                    value={profile.name}
-                                    onChange={(event) =>
-                                        setProfileField(
-                                            'name',
-                                            event.target.value,
-                                        )
-                                    }
-                                    autoComplete="name"
-                                    required
-                                    aria-invalid={Boolean(
-                                        profileErrors.name,
-                                    )}
-                                    className={`${inputClass} pl-9`}
-                                />
-                            </div>
-                        </Field>
+                            <Field
+                                label="Name"
+                                htmlFor="admin-name"
+                                error={
+                                    profileErrors.name
+                                }
+                            >
+                                <div className="relative">
+                                    <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-                        {/* Email - read only */}
-                        <Field
-                            label="Email address"
-                            htmlFor="admin-email"
-                            error={profileErrors.email}
-                        >
-                            <div className="relative">
-                                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                    <input
+                                        id="admin-name"
+                                        name="name"
+                                        type="text"
+                                        value={
+                                            profile.name
+                                        }
+                                        onChange={(
+                                            event,
+                                        ) =>
+                                            setProfileField(
+                                                'name',
+                                                event.target
+                                                    .value,
+                                            )
+                                        }
+                                        autoComplete="name"
+                                        required
+                                        aria-invalid={Boolean(
+                                            profileErrors.name,
+                                        )}
+                                        disabled={
+                                            isProfilePending
+                                        }
+                                        className={`${inputClass} pl-9 disabled:cursor-not-allowed disabled:opacity-60`}
+                                    />
+                                </div>
+                            </Field>
 
-                                <input
-                                    id="admin-email"
-                                    name="email"
-                                    type="email"
-                                    value={profile.email}
-                                    readOnly
-                                    aria-readonly="true"
-                                    className={`${inputClass} cursor-not-allowed bg-slate-50/80 pl-9 text-slate-500`}
-                                />
-                            </div>
+                            {/* Email */}
 
-                            <p className="mt-1.5 text-[11px] leading-4 text-slate-500">
-                                Your account email cannot be changed.
-                            </p>
-                        </Field>
+                            <Field
+                                label="Email address"
+                                htmlFor="admin-email"
+                                error={
+                                    profileErrors.email
+                                }
+                            >
+                                <div className="relative">
+                                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-                        <div className="flex justify-end pt-1">
+                                    <input
+                                        id="admin-email"
+                                        name="email"
+                                        type="email"
+                                        value={
+                                            profile.email
+                                        }
+                                        readOnly
+                                        aria-readonly="true"
+                                        className={`${inputClass} cursor-not-allowed bg-slate-50 pl-9 text-slate-500`}
+                                    />
+                                </div>
+
+                                <p className="mt-1.5 text-[11px] leading-4 text-slate-500">
+                                    Your account email
+                                    cannot be changed.
+                                </p>
+                            </Field>
+                        </div>
+
+                        <div className="flex justify-end border-t border-orange-100 pt-4">
                             <button
                                 type="submit"
-                                disabled={isProfilePending}
+                                disabled={
+                                    isProfilePending
+                                }
                                 className={buttonClass}
                             >
                                 {isProfilePending ? (
@@ -351,100 +409,138 @@ export default function AccountForm({
                     </form>
                 </AccountSection>
 
-                {/* Password */}
+                {/* =====================================================
+                    Password
+                ===================================================== */}
+
                 <AccountSection
-                    icon={<KeyRound className="h-[17px] w-[17px]" />}
+                    icon={
+                        <KeyRound className="h-4 w-4" />
+                    }
                     title="Change password"
                     description="Update your admin password. You will need to log in again after changing it."
                 >
                     <form
-                        onSubmit={handlePasswordSubmit}
+                        onSubmit={
+                            handlePasswordSubmit
+                        }
                         noValidate
                         className="space-y-5"
                     >
-                        <Field
-                            label="Current password"
-                            htmlFor="current-password"
-                            error={passwordErrors.currentPassword}
-                        >
-                            <div className="relative">
-                                <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <div className="grid gap-5 sm:grid-cols-2">
+                            {/* Current password */}
 
-                                <input
-                                    id="current-password"
-                                    name="currentPassword"
-                                    type="password"
-                                    value={password.currentPassword}
-                                    onChange={(event) =>
-                                        setPasswordField(
-                                            'currentPassword',
-                                            event.target.value,
-                                        )
-                                    }
-                                    autoComplete="current-password"
-                                    required
-                                    aria-invalid={Boolean(
-                                        passwordErrors.currentPassword,
-                                    )}
-                                    className={`${inputClass} pl-9`}
-                                />
-                            </div>
-                        </Field>
+                            <Field
+                                label="Current password"
+                                htmlFor="current-password"
+                                error={
+                                    passwordErrors.currentPassword
+                                }
+                            >
+                                <div className="relative">
+                                    <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-                        <Field
-                            label="New password"
-                            htmlFor="new-password"
-                            error={passwordErrors.newPassword}
-                        >
-                            <div className="relative">
-                                <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                    <input
+                                        id="current-password"
+                                        name="currentPassword"
+                                        type="password"
+                                        value={
+                                            password.currentPassword
+                                        }
+                                        onChange={(
+                                            event,
+                                        ) =>
+                                            setPasswordField(
+                                                'currentPassword',
+                                                event.target
+                                                    .value,
+                                            )
+                                        }
+                                        autoComplete="current-password"
+                                        required
+                                        aria-invalid={Boolean(
+                                            passwordErrors.currentPassword,
+                                        )}
+                                        disabled={
+                                            isPasswordPending
+                                        }
+                                        className={`${inputClass} pl-9 disabled:cursor-not-allowed disabled:opacity-60`}
+                                    />
+                                </div>
+                            </Field>
 
-                                <input
-                                    id="new-password"
-                                    name="newPassword"
-                                    type="password"
-                                    value={password.newPassword}
-                                    onChange={(event) =>
-                                        setPasswordField(
-                                            'newPassword',
-                                            event.target.value,
-                                        )
-                                    }
-                                    autoComplete="new-password"
-                                    required
-                                    aria-invalid={Boolean(
-                                        passwordErrors.newPassword,
-                                    )}
-                                    className={`${inputClass} pl-9`}
-                                />
-                            </div>
-                        </Field>
+                            {/* New password */}
 
-                        {/* Security note */}
-                        <div className="rounded-xl border border-amber-200/70 bg-amber-50/40 px-4 py-3.5">
-                            <div className="flex items-start gap-2.5">
-                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                            <Field
+                                label="New password"
+                                htmlFor="new-password"
+                                error={
+                                    passwordErrors.newPassword
+                                }
+                            >
+                                <div className="relative">
+                                    <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                                    <input
+                                        id="new-password"
+                                        name="newPassword"
+                                        type="password"
+                                        value={
+                                            password.newPassword
+                                        }
+                                        onChange={(
+                                            event,
+                                        ) =>
+                                            setPasswordField(
+                                                'newPassword',
+                                                event.target
+                                                    .value,
+                                            )
+                                        }
+                                        autoComplete="new-password"
+                                        required
+                                        aria-invalid={Boolean(
+                                            passwordErrors.newPassword,
+                                        )}
+                                        disabled={
+                                            isPasswordPending
+                                        }
+                                        className={`${inputClass} pl-9 disabled:cursor-not-allowed disabled:opacity-60`}
+                                    />
+                                </div>
+                            </Field>
+                        </div>
+
+                        {/* Security Note */}
+
+                        <div className="rounded-xl border border-amber-200/70 bg-amber-50/50 p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
                                     <ShieldCheck className="h-4 w-4" />
                                 </div>
 
-                                <div>
-                                    <p className="text-[13px] font-semibold leading-5 text-slate-800">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-slate-800">
                                         Session security
                                     </p>
 
-                                    <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                                        Changing your password invalidates
-                                        previous sessions and signs you out.
-                                        You will need to log in again.
+                                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                                        Changing your password
+                                        invalidates previous
+                                        sessions and signs you
+                                        out. You will need to log
+                                        in again.
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex justify-end pt-1">
+                        <div className="flex justify-end border-t border-orange-100 pt-4">
                             <button
                                 type="submit"
-                                disabled={isPasswordPending}
+                                disabled={
+                                    isPasswordPending
+                                }
                                 className={buttonClass}
                             >
                                 {isPasswordPending ? (
@@ -461,10 +557,13 @@ export default function AccountForm({
                     </form>
                 </AccountSection>
 
-                {/* Security */}
+                {/* =====================================================
+                    Security
+                ===================================================== */}
+
                 <AccountSection
                     icon={
-                        <ShieldCheck className="h-[17px] w-[17px]" />
+                        <ShieldCheck className="h-4 w-4" />
                     }
                     title="Security"
                     description="Account protection currently handled by the admin authentication system."
@@ -487,14 +586,18 @@ export default function AccountForm({
                     </div>
                 </AccountSection>
 
-                {/* Footer */}
-                <div className="border-t border-amber-100 bg-[#fffaf4] px-6 py-4 sm:px-8 lg:px-10">
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-amber-600" />
+                {/* =====================================================
+                    Footer
+                ===================================================== */}
+
+                <div className="border-t border-orange-100 bg-[#fffaf6] px-4 py-4 sm:px-6 lg:px-8">
+                    <div className="flex items-start gap-2 text-xs leading-5 text-slate-500">
+                        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
 
                         <span>
-                            Your account settings are protected and only
-                            accessible to authenticated administrators.
+                            Your account settings are protected
+                            and only accessible to authenticated
+                            administrators.
                         </span>
                     </div>
                 </div>
@@ -503,15 +606,15 @@ export default function AccountForm({
     );
 }
 
-/* =========================================================
+/* ============================================================
    Shared UI
-========================================================= */
+============================================================ */
 
 const inputClass =
-    'block w-full rounded-lg border border-amber-200/80 bg-amber-50/25 px-3 py-2.5 text-sm leading-5 text-slate-900 shadow-none outline-none placeholder:text-slate-400 transition-all duration-200 hover:border-amber-300 hover:bg-amber-50/40 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10';
+    'block w-full rounded-xl border border-orange-100 bg-[#fffaf6] px-3 py-2.5 text-sm leading-5 text-slate-900 outline-none placeholder:text-slate-400 transition-all duration-200 hover:border-orange-200 focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-500/10';
 
 const buttonClass =
-    'inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold leading-5 text-white shadow-sm transition-all duration-200 hover:bg-amber-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:cursor-not-allowed disabled:opacity-60';
+    'inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold leading-5 text-white shadow-sm transition-all duration-200 hover:bg-orange-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-orange-500/20 disabled:cursor-not-allowed disabled:opacity-60';
 
 function AccountSection({
     icon,
@@ -525,9 +628,9 @@ function AccountSection({
     children: ReactNode;
 }) {
     return (
-        <section className="grid grid-cols-1 gap-7 border-b border-amber-100 px-6 py-8 sm:px-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12 lg:px-10">
-            <div className="flex gap-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-200/80 bg-amber-50 text-amber-700 shadow-sm">
+        <section className="grid gap-6 border-b border-orange-100 px-4 py-7 sm:px-6 sm:py-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 lg:px-8">
+            <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-200/70 bg-amber-50 text-amber-700">
                     {icon}
                 </div>
 
@@ -537,7 +640,7 @@ function AccountSection({
                     </h2>
 
                     {description && (
-                        <p className="mt-1.5 max-w-xs text-[12px] leading-5 text-slate-500">
+                        <p className="mt-1.5 max-w-xs text-xs leading-5 text-slate-500">
                             {description}
                         </p>
                     )}
@@ -563,7 +666,7 @@ function Field({
     children: ReactNode;
 }) {
     return (
-        <div>
+        <div className="min-w-0">
             <label
                 htmlFor={htmlFor}
                 className="block text-[13px] font-semibold text-slate-800"
@@ -592,13 +695,13 @@ function SecurityItem({
     description: string;
 }) {
     return (
-        <div className="rounded-xl border border-amber-200/60 bg-amber-50/25 px-4 py-3.5 transition-colors duration-200 hover:bg-amber-50/40">
+        <div className="rounded-xl border border-orange-100 bg-[#fffaf6] p-3.5 transition-colors duration-200 hover:border-orange-200">
             <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-700">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <p className="text-[13px] font-semibold leading-5 text-slate-800">
                         {title}
                     </p>
@@ -637,4 +740,3 @@ function Spinner() {
         </svg>
     );
 }
-
