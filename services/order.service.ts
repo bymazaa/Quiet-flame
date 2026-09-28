@@ -22,14 +22,14 @@ import { escapeRegex, fromCents, getPagination, getTotalPages, toCents } from '@
 
 import { ok, fail, validationFail, handleError, type ActionResult } from '@/lib/action-result';
 
-import { DEFAULT_CURRENCY, type OrderStatus } from '@/lib/constants';
+import { DEFAULT_CURRENCY, PAYMENT_STATUSES, type OrderStatus } from '@/lib/constants';
 import { generateConfirmationToken, hashConfirmationToken } from '@/lib/token';
 
 const ADMIN_PAGE_SIZE = 10;
 
 const ADMIN_ORDER_STATUSES = ['pending', 'confirmed', 'delivered', 'cancelled'] as const;
 
-const ADMIN_PAYMENT_STATUSES = ['pending', 'paid'] as const;
+const ADMIN_PAYMENT_STATUSES = PAYMENT_STATUSES ;
 
 type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 type AdminPaymentStatus = (typeof ADMIN_PAYMENT_STATUSES)[number];

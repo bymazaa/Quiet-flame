@@ -39,6 +39,7 @@ import type {
 import type {
     PaymentStatus,
 } from '@/lib/constants';
+import { LocalDateTime } from '../ui/Timeformat';
 
 interface OrderTableProps {
     orders: OrderDTO[];
@@ -380,9 +381,7 @@ export function OrderTable({
                                             {/* Date */}
 
                                             <td className="whitespace-nowrap px-3 py-3 text-chocolate-soft">
-                                                {formatDate(
-                                                    order.createdAt,
-                                                )}
+                                               <LocalDateTime date={order.createdAt}/>
                                             </td>
 
                                             {/* Menu */}

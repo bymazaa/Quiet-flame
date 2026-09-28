@@ -1,15 +1,17 @@
-
 import Image from 'next/image';
 
 import {
-    formatDate,
     formatPrice,
     hasDiscount,
 } from '@/lib/utils';
 
 import { ProductActions } from '@/app/components/admin/ProductActions';
 
+
+
 import type { ProductDTO } from '@/services/product.service';
+import { LocalDate } from '../ui/LocalDate';
+import { LocalDateTime } from '../ui/Timeformat';
 
 export function ProductTable({
     products,
@@ -18,11 +20,15 @@ export function ProductTable({
 }) {
     return (
         <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm">
                 <thead>
                     <tr className="border-b border-orange-100 bg-orange-50/40">
                         <th className="w-20 py-4 pl-5 pr-3 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
                             Image
+                        </th>
+
+                        <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
+                            Created
                         </th>
 
                         <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
@@ -38,7 +44,7 @@ export function ProductTable({
                         </th>
 
                         <th className="px-3 py-4 text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
-                            Created
+                            Last updated
                         </th>
 
                         <th className="w-36 py-4 pl-3 pr-5 text-right text-xs font-semibold uppercase tracking-wide text-chocolate-muted">
@@ -49,10 +55,11 @@ export function ProductTable({
 
                 <tbody className="divide-y divide-orange-50">
                     {products.map((product) => {
-                        const discounted = hasDiscount(
-                            product.price,
-                            product.compareAtPrice,
-                        );
+                        const discounted =
+                            hasDiscount(
+                                product.price,
+                                product.compareAtPrice,
+                            );
 
                         return (
                             <tr
@@ -60,8 +67,9 @@ export function ProductTable({
                                 className="group bg-white transition-colors duration-200 hover:bg-orange-50/30"
                             >
                                 {/* Image */}
+
                                 <td className="py-4 pl-5 pr-3">
-                                    <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-orange-100 bg-orange-50 shadow-sm">
+                                    <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-orange-100 bg-orange-50 shadow-sm">
                                         {product.images[0] ? (
                                             <Image
                                                 src={
@@ -82,22 +90,32 @@ export function ProductTable({
                                     </div>
                                 </td>
 
+                                {/* Created */}
+
+                                <td className="px-3 py-4">
+                                    <LocalDate
+                                        date={
+                                            product.createdAt
+                                        }
+                                    />
+                                </td>
+
                                 {/* Product */}
+
                                 <td className="px-3 py-4">
                                     <div className="min-w-0">
-                                        <p className="max-w-[280px] truncate font-semibold text-chocolate">
+                                        <p className="max-w-[260px] truncate font-semibold text-chocolate">
                                             {product.name}
                                         </p>
 
-                                        <div className="mt-1 flex items-center gap-2">
-                                            <span className="max-w-[280px] truncate text-xs text-chocolate-muted">
-                                                /{product.slug}
-                                            </span>
-                                        </div>
+                                        <p className="mt-1 max-w-[260px] truncate text-xs text-chocolate-muted">
+                                            /{product.slug}
+                                        </p>
                                     </div>
                                 </td>
 
                                 {/* Price */}
+
                                 <td className="px-3 py-4">
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
@@ -127,6 +145,7 @@ export function ProductTable({
                                 </td>
 
                                 {/* Status */}
+
                                 <td className="px-3 py-4">
                                     <span
                                         className={
@@ -149,22 +168,18 @@ export function ProductTable({
                                     </span>
                                 </td>
 
-                                {/* Created */}
-                                <td className="px-3 py-4">
-                                    <div className="whitespace-nowrap">
-                                        <p className="text-sm font-medium text-chocolate-soft">
-                                            {formatDate(
-                                                product.createdAt,
-                                            )}
-                                        </p>
+                                {/* Updated */}
 
-                                        <p className="mt-0.5 text-[11px] text-chocolate-muted">
-                                            Created
-                                        </p>
-                                    </div>
+                                <td className="px-3 py-4">
+                                    <LocalDateTime
+                                        date={
+                                            product.updatedAt
+                                        }
+                                    />
                                 </td>
 
                                 {/* Actions */}
+
                                 <td className="py-4 pl-3 pr-5">
                                     <div className="flex justify-end">
                                         <div className="rounded-xl border border-orange-100 bg-white p-1 shadow-sm transition group-hover:border-orange-200 group-hover:shadow-md">

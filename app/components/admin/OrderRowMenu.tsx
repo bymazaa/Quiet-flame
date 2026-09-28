@@ -16,7 +16,7 @@ import {
     updatePaymentStatusAction,
 } from '@/app/admin/(dashboard)/orders/actions';
 
-import { ORDER_STATUSES, type OrderStatus, type PaymentStatus } from '@/lib/constants';
+import { ORDER_STATUSES, PAYMENT_STATUSES, type OrderStatus, type PaymentStatus } from '@/lib/constants';
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
     pending: 'Pending',
@@ -33,7 +33,7 @@ const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
     refunded: 'Refunded',
 };
 
-const PAYMENT_STATUSES: PaymentStatus[] = ['pending', 'paid'];
+
 
 export function OrderRowMenu({
     orderId,
