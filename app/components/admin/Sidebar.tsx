@@ -14,6 +14,7 @@ import {
     Settings2,
     ShoppingCart,
     UserRound,
+    Handshake ,
     X,
 } from 'lucide-react';
 
@@ -50,6 +51,12 @@ const NAV_ITEMS = [
         href: '/admin/settings',
         label: 'Settings',
         icon: Settings2,
+        exact: false,
+    },
+    {
+        href: '/admin/hand-over-guide',
+        label: 'Hand Over Guide',
+        icon: Handshake ,
         exact: false,
     },
 ] as const;

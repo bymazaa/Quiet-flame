@@ -1,0 +1,35 @@
+Custom Ecommerce Development
+Service	Original Price	40% Discounted Price
+Custom UI/UX Design & Next.js Frontend Development	$650	$390
+Backend, Database & API Development	$450	$270
+Admin Dashboard & Management	$350	$210
+Cart, Checkout & Order System	$300	$180
+Authentication, Validation & Security	$150	$90
+Testing, Optimization & Deployment	$100	$60
+Total	$2,000	$1,200
+Why a Custom-Built App Instead of WordPress?
+
+A custom-built ecommerce application is developed specifically for your business instead of being assembled from a theme and multiple plugins.
+
+Better performance: A custom Next.js application can be optimized specifically for your store.
+Fully customized: Features and workflows are built around your exact business requirements.
+Better control: Full control over the database, backend logic, security, and user experience.
+More scalable: New features and integrations can be added without depending heavily on third-party plugins.
+Less plugin dependency: Fewer plugin conflicts, compatibility issues, and unnecessary functionality.
+Modern technology: Built with Next.js, TypeScript, MongoDB, and a modern full-stack architecture.
+Professional user experience: The storefront and admin system are designed specifically for your business.
+
+Why choose custom over WordPress?
+WordPress can be a great choice for simple websites, but for a customized ecommerce business, a custom-built application gives you more control over performance, features, security, and future development.
+
+Free 1-Month Support
+
+1 month of free post-launch support is included.
+
+Any bugs or issues related to the delivered features will be fixed at no additional cost during this period.
+
+Final Price
+
+Original Price: $2,000
+40% Discount: -$800
+Final Project Price: $1,200
