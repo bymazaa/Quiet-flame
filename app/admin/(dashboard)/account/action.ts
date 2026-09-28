@@ -7,6 +7,7 @@ import {
 } from '@/services/auth.service';
 
 import type { ActionResult } from '@/lib/action-result';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Update admin profile.
@@ -17,7 +18,13 @@ export async function updateProfile(
     adminEmail: string,
     data: unknown,
 ): Promise<ActionResult> {
-    return updateProfileService(adminEmail, data);
+    const result=await updateProfileService(adminEmail, data);
+    if(!result.success){
+        return result;
+    }
+     revalidatePath('/admin',"layout");
+     return result
+
 }
 
 /**

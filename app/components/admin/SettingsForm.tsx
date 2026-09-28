@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import {
     updateSettings,
 } from '@/app/admin/(dashboard)/settings/actions';
@@ -73,6 +75,8 @@ interface SettingsFormProps {
 export default function SettingsForm({
     initialSettings,
 }: SettingsFormProps) {
+    const router = useRouter();
+
     const [form, setForm] =
         useState<FormState>(() =>
             toFormState(initialSettings),
@@ -161,11 +165,22 @@ export default function SettingsForm({
                 },
             );
 
+            /**
+             * Sync the local form with the exact
+             * data returned from the database.
+             */
             setForm(
                 toFormState(
                     result.data as SiteSettingsDTO,
                 ),
             );
+
+            /**
+             * Refresh the current route so any
+             * server components using getSettings()
+             * receive the latest data.
+             */
+            router.refresh();
         });
     }
 
@@ -193,14 +208,13 @@ export default function SettingsForm({
                                 <LogoPreview
                                     key={form.logoUrl}
                                     url={form.logoUrl}
-                                    fallbackLetter={
-                                        initial
-                                    }
+                                    fallbackLetter={initial}
                                 />
 
                                 <div className="min-w-0">
                                     <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-700">
                                         <Store className="h-3 w-3" />
+
                                         Store settings
                                     </div>
 
@@ -255,10 +269,10 @@ export default function SettingsForm({
                                     id="brandName"
                                     name="brandName"
                                     type="text"
-                                    value={form.brandName}
-                                    onChange={(
-                                        event,
-                                    ) =>
+                                    value={
+                                        form.brandName
+                                    }
+                                    onChange={(event) =>
                                         set(
                                             'brandName',
                                             event.target
@@ -267,9 +281,7 @@ export default function SettingsForm({
                                     }
                                     autoComplete="organization"
                                     required
-                                    disabled={
-                                        isPending
-                                    }
+                                    disabled={isPending}
                                     aria-invalid={Boolean(
                                         fieldErrors.brandName,
                                     )}
@@ -292,9 +304,7 @@ export default function SettingsForm({
                                         value={
                                             form.description
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'description',
                                                 event.target
@@ -302,9 +312,7 @@ export default function SettingsForm({
                                             )
                                         }
                                         rows={4}
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.description,
                                         )}
@@ -339,9 +347,7 @@ export default function SettingsForm({
                                         value={
                                             form.logoUrl
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'logoUrl',
                                                 event.target
@@ -350,9 +356,7 @@ export default function SettingsForm({
                                         }
                                         placeholder="https://example.com/logo.png"
                                         autoComplete="url"
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.logoUrl,
                                         )}
@@ -392,9 +396,7 @@ export default function SettingsForm({
                                         value={
                                             form.address
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'address',
                                                 event.target
@@ -402,9 +404,7 @@ export default function SettingsForm({
                                             )
                                         }
                                         autoComplete="street-address"
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.address,
                                         )}
@@ -430,9 +430,7 @@ export default function SettingsForm({
                                         value={
                                             form.websiteUrl
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'websiteUrl',
                                                 event.target
@@ -441,9 +439,7 @@ export default function SettingsForm({
                                         }
                                         placeholder="https://example.com"
                                         autoComplete="url"
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.websiteUrl,
                                         )}
@@ -467,9 +463,7 @@ export default function SettingsForm({
                                         value={
                                             form.phone
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'phone',
                                                 event.target
@@ -478,9 +472,7 @@ export default function SettingsForm({
                                         }
                                         autoComplete="tel"
                                         inputMode="tel"
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.phone,
                                         )}
@@ -502,9 +494,7 @@ export default function SettingsForm({
                                         value={
                                             form.email
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'email',
                                                 event.target
@@ -512,9 +502,7 @@ export default function SettingsForm({
                                             )
                                         }
                                         autoComplete="email"
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.email,
                                         )}
@@ -652,21 +640,16 @@ export default function SettingsForm({
                                         value={
                                             form.shippingCost
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             set(
                                                 'shippingCost',
                                                 Number(
-                                                    event
-                                                        .target
+                                                    event.target
                                                         .value,
                                                 ),
                                             )
                                         }
-                                        disabled={
-                                            isPending
-                                        }
+                                        disabled={isPending}
                                         aria-invalid={Boolean(
                                             fieldErrors.shippingCost,
                                         )}
@@ -676,10 +659,11 @@ export default function SettingsForm({
                             </div>
                         </Field>
 
-                        <div className="rounded-xl border border-orange-100 bg-[#fffaf6] p-3.5">
+                        <div className="mt-4 rounded-xl border border-orange-100 bg-[#fffaf6] p-3.5">
                             <p className="text-xs font-medium leading-5 text-chocolate-soft">
-                                This amount will be used as the default
-                                shipping charge during checkout.
+                                This amount will be used as
+                                the default shipping charge
+                                during checkout.
                             </p>
                         </div>
                     </Section>
@@ -696,8 +680,8 @@ export default function SettingsForm({
                                 </p>
 
                                 <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                                    Changes will be reflected across
-                                    your storefront.
+                                    Changes will be reflected
+                                    across your storefront.
                                 </p>
                             </div>
 

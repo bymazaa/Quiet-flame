@@ -8,13 +8,19 @@ import type { ActionResult } from '@/lib/action-result';
 export async function setProductActiveAction(id: string, isActive: boolean): Promise<ActionResult> {
     await requireAdmin();
     const result = await productService.setProductActive(id, isActive);
-    if (result.success) revalidatePath('/admin/products');
+    if (result.success) {
+        revalidatePath('/admin/products');
+        revalidatePath('/', 'layout');
+    }
     return result;
 }
 
 export async function deleteProductAction(id: string): Promise<ActionResult> {
     await requireAdmin();
     const result = await productService.softDeleteProduct(id);
-    if (result.success) revalidatePath('/admin/products');
+    if (result.success){
+         revalidatePath('/', 'layout');
+         revalidatePath('/admin/products');
+    } 
     return result;
 }
