@@ -1,11 +1,14 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
 import { Label } from '@/app/components/ui/Label';
 import { FormError } from '@/app/components/ui/FormError';
+
 import { loginAction } from '@/app/admin/login/actions';
+
 import type { ActionResult } from '@/lib/action-result';
 
 const initialState: ActionResult | null = null;
@@ -24,7 +27,11 @@ function MailIcon() {
                 strokeLinejoin="round"
                 d="M2.25 6.75c0-.414.336-.75.75-.75h18a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-18a.75.75 0 01-.75-.75V6.75z"
             />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7l9 6 9-6" />
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7l9 6 9-6"
+            />
         </svg>
     );
 }
@@ -85,13 +92,24 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 export function LoginForm() {
-    const [state, formAction, isPending] = useActionState(loginAction, initialState);
+    const [state, formAction, isPending] = useActionState(
+        loginAction,
+        initialState,
+    );
+
     const [showPassword, setShowPassword] = useState(false);
 
-    const generalError = state && !state.success && !state.fieldErrors ? state.error : undefined;
+    const generalError =
+        state && !state.success && !state.fieldErrors
+            ? state.error
+            : undefined;
 
     return (
-        <form action={formAction} noValidate className="space-y-5">
+        <form
+            action={formAction}
+            noValidate
+            className="space-y-5"
+        >
             {generalError ? (
                 <div
                     role="alert"
@@ -103,10 +121,12 @@ export function LoginForm() {
 
             <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
+
                 <div className="relative">
                     <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-chocolate-muted">
                         <MailIcon />
                     </span>
+
                     <Input
                         id="email"
                         name="email"
@@ -116,20 +136,32 @@ export function LoginForm() {
                         spellCheck={false}
                         placeholder="you@quietflame.shop"
                         className="pl-9 transition-shadow duration-200"
-                        hasError={!state?.success && !!state?.fieldErrors?.email}
+                        hasError={
+                            !state?.success &&
+                            !!state?.fieldErrors?.email
+                        }
                         disabled={isPending}
                         required
                     />
                 </div>
-                <FormError message={!state?.success ? state?.fieldErrors?.email : undefined} />
+
+                <FormError
+                    message={
+                        !state?.success
+                            ? state?.fieldErrors?.email
+                            : undefined
+                    }
+                />
             </div>
 
             <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
+
                 <div className="relative">
                     <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-chocolate-muted">
                         <LockIcon />
                     </span>
+
                     <Input
                         id="password"
                         name="password"
@@ -137,21 +169,38 @@ export function LoginForm() {
                         autoComplete="current-password"
                         placeholder="••••••••"
                         className="pl-9 pr-10 transition-shadow duration-200"
-                        hasError={!state?.success && !!state?.fieldErrors?.password}
+                        hasError={
+                            !state?.success &&
+                            !!state?.fieldErrors?.password
+                        }
                         disabled={isPending}
                         required
                     />
+
                     <button
                         type="button"
-                        onClick={() => setShowPassword((v) => !v)}
+                        onClick={() =>
+                            setShowPassword((value) => !value)
+                        }
                         tabIndex={-1}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-label={
+                            showPassword
+                                ? 'Hide password'
+                                : 'Show password'
+                        }
                         className="absolute inset-y-0 right-3 flex items-center text-chocolate-muted transition-colors hover:text-chocolate"
                     >
                         <EyeIcon open={showPassword} />
                     </button>
                 </div>
-                <FormError message={!state?.success ? state?.fieldErrors?.password : undefined} />
+
+                <FormError
+                    message={
+                        !state?.success
+                            ? state?.fieldErrors?.password
+                            : undefined
+                    }
+                />
             </div>
 
             <Button
@@ -163,10 +212,19 @@ export function LoginForm() {
                 {isPending ? 'Signing in…' : 'Sign in'}
             </Button>
 
+         
+
             <style>{`
                 @keyframes slideDown {
-                    from { opacity: 0; transform: translateY(-6px); }
-                    to { opacity: 1; transform: translateY(0); }
+                    from {
+                        opacity: 0;
+                        transform: translateY(-6px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
                 }
             `}</style>
         </form>

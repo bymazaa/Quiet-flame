@@ -1,7 +1,11 @@
 import { z } from 'zod';
+
 import { emailSchema } from './common.schema';
 
-/** 8-72 chars (bcrypt ignores anything after 72 bytes), upper + lower + number */
+/**
+ * 8-72 chars (bcrypt ignores anything after 72 bytes),
+ * must include uppercase, lowercase, and number.
+ */
 export const passwordSchema = z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -19,20 +23,30 @@ const nameSchema = z
 /* Login form + login Server Action */
 export const loginSchema = z.object({
     email: emailSchema,
-    password: z.string().min(1, 'Password is required').max(128, 'Password is too long'),
+    password: z
+        .string()
+        .min(1, 'Password is required')
+        .max(128, 'Password is too long'),
 });
 
-/* /admin/account: update name & email */
+/* admin/account: update name */
 export const updateProfileSchema = z.object({
     name: nameSchema,
 });
 
-/* /admin/account: change password */
+/* admin/account: change password */
 export const changePasswordSchema = z
     .object({
-        currentPassword: z.string().min(1, 'Current password is required').max(128),
+        currentPassword: z
+            .string()
+            .min(1, 'Current password is required')
+            .max(128),
+
         newPassword: passwordSchema,
-        confirmPassword: z.string().min(1, 'Please confirm your new password'),
+
+        confirmPassword: z
+            .string()
+            .min(1, 'Please confirm your new password'),
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
         message: 'Passwords do not match',
@@ -43,6 +57,35 @@ export const changePasswordSchema = z
         path: ['newPassword'],
     });
 
+/* Forgot password */
+export const forgotPasswordSchema = z.object({
+    email: emailSchema,
+});
+
+/* Reset password */
+export const resetPasswordSchema = z
+    .object({
+        token: z
+            .string()
+            .trim()
+            .min(1, 'Reset token is required.'),
+
+        password: passwordSchema,
+
+        confirmPassword: z
+            .string()
+            .min(1, 'Please confirm your password.'),
+    })
+    .refine(
+        (data) => data.password === data.confirmPassword,
+        {
+            path: ['confirmPassword'],
+            message: 'Passwords do not match.',
+        },
+    );
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

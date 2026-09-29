@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
+
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
+
 import { getCurrentAdmin } from '@/lib/auth';
 import { getSettings } from '@/services/settings.service';
 
 import { Card, CardBody } from '@/app/components/ui/Card';
 import { LoginForm } from '@/app/components/admin/LoginForm';
+import { ForgotPasswordModal } from '@/app/components/admin/ForgotPasswordModal';
 
 export const metadata: Metadata = {
     title: 'Admin Login',
@@ -13,9 +16,8 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLoginPage() {
-    // Second layer of protection (in addition to proxy.ts): if already
-    // logged in, skip the login page entirely.
     const admin = await getCurrentAdmin();
+
     if (admin) redirect('/admin');
 
     const settings = await getSettings();
@@ -30,18 +32,26 @@ export default async function AdminLoginPage() {
                             alt={settings.brandName}
                             width={80}
                             height={70}
-                            className="mx-auto mb-4 "
+                            className="mx-auto mb-4"
                         />
                     ) : null}
+
                     <p className="text-[13px] tracking-wide text-chocolate-muted">
                         {settings.brandName}
                     </p>
-                    <h1 className="mt-2 font-serif text-2xl text-chocolate">Admin sign in</h1>
+
+                    <h1 className="mt-2 font-serif text-2xl text-chocolate">
+                        Admin sign in
+                    </h1>
                 </div>
 
                 <Card elevation="lifted">
                     <CardBody className="p-6">
                         <LoginForm />
+
+                        <div className="text-center">
+                            <ForgotPasswordModal />
+                        </div>
                     </CardBody>
                 </Card>
 

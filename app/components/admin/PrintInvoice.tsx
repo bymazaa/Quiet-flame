@@ -9,6 +9,7 @@ import {
 
 import { formatPrice } from '@/lib/utils';
 import { LocalDateTime } from '@/app/components/ui/Timeformat';
+import { printHeightLightPoint } from '@/lib/constants';
 
 type PrintInvoiceProps = {
     order: {
@@ -90,7 +91,7 @@ export function PrintInvoice({
                                     </h1>
 
                                     <p className="text-[8px] uppercase tracking-[0.18em] text-gray-500">
-                                        Handcrafted Candles
+                                        {printHeightLightPoint}
                                     </p>
                                 </div>
                             </div>

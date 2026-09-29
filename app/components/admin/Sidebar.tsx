@@ -16,10 +16,12 @@ import {
     UserRound,
     Handshake ,
     X,
+    UserCog 
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { LogoutButton } from '@/app/components/admin/LogoutButton';
+
 
 const NAV_ITEMS = [
     {
@@ -51,6 +53,12 @@ const NAV_ITEMS = [
         href: '/admin/settings',
         label: 'Settings',
         icon: Settings2,
+        exact: false,
+    },
+    {
+        href: '/admin/account/admin-management',
+        label: 'Admin Management',
+        icon: UserCog  ,
         exact: false,
     },
     {

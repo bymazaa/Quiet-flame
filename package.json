@@ -7,8 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "seed": "tsx scripts/seed.ts",
-        "seed:admin": "tsx scripts/seed.ts --admin-only"
+        "seed": "tsx scripts/seed.ts"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.9.1",

@@ -39,6 +39,7 @@ import { validateCartAction } from './action';
 import {
     MAX_ITEM_QUANTITY,
 } from '@/lib/validation/cart.schema';
+import { categoryName } from '@/lib/constants';
 
 type ValidationState = {
     data: CartValidationDTO | null;
@@ -656,14 +657,14 @@ export default function CartPageClient() {
                         <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-chocolate-soft">
                             Looks like you haven&apos;t added
                             anything yet. Explore our handcrafted
-                            candles and find something you love.
+                            {categoryName} and find something you love.
                         </p>
 
                         <Link
                             href="/products"
                             className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-100 transition hover:bg-orange-600"
                         >
-                            Explore Candles
+                            Explore {categoryName}
 
                             <ArrowRight className="h-4 w-4" />
                         </Link>
@@ -885,7 +886,7 @@ export default function CartPageClient() {
                                     href="/products"
                                     className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold text-white"
                                 >
-                                    Shop Candles
+                                    Shop {categoryName}
 
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>

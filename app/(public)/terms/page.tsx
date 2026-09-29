@@ -1,11 +1,12 @@
 import { LegalLayout, LegalSection } from '@/app/components/legal/LegalLayout';
 import { LAST_UPDATED, SITE_CONTACT } from '@/lib/site-contact';
+import { categoryName } from '@/lib/constants';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
     title: `Terms & Conditions | ${SITE_CONTACT.brandName}`,
-    description: `The terms that apply when you order from ${SITE_CONTACT.brandName}.`,
+    description: `The terms that apply when you order ${categoryName.toLowerCase()} products from ${SITE_CONTACT.brandName}.`,
     alternates: { canonical: '/terms' },
 };
 
@@ -16,7 +17,7 @@ const sections = [
     { id: 'payment', label: 'Payment' },
     { id: 'shipping', label: 'Shipping & delivery' },
     { id: 'cancellations', label: 'Cancellations & changes' },
-    { id: 'product-care', label: 'Product & candle care' },
+    { id: 'product-care', label: 'Product care' },
     { id: 'website-use', label: 'Use of this website' },
     { id: 'liability', label: 'Liability' },
     { id: 'changes', label: 'Changes to these terms' },
@@ -28,7 +29,7 @@ export default function TermsPage() {
         <LegalLayout
             eyebrow="Please read before ordering"
             title="Terms & Conditions"
-            intro={`These terms govern your use of the ${SITE_CONTACT.brandName} website and any order you place with us.`}
+            intro={`These terms govern your use of the ${SITE_CONTACT.brandName} website and any ${categoryName.toLowerCase()} product order you place with us.`}
             updatedDate={LAST_UPDATED}
             sections={sections}
         >
@@ -46,6 +47,7 @@ export default function TermsPage() {
                     confirm it. Once submitted, we verify the order on our end (including the
                     product and price) before it is confirmed.
                 </p>
+
                 <p>
                     We reserve the right to cancel any order, including after confirmation, if a
                     product listing contained an error, if we suspect fraud, or if we are otherwise
@@ -60,6 +62,7 @@ export default function TermsPage() {
                     time of order, based on the current listed price of each product. Any discounted
                     or &ldquo;original&rdquo; price shown is for comparison only.
                 </p>
+
                 <p>
                     While we try to keep pricing accurate, occasional errors may occur. If a pricing
                     error is discovered before your order is confirmed, we will contact you before
@@ -93,12 +96,11 @@ export default function TermsPage() {
                 </p>
             </LegalSection>
 
-            <LegalSection id="product-care" heading="Product & candle care">
+            <LegalSection id="product-care" heading="Product care">
                 <p>
-                    Our candles are handcrafted and should be burned within sight, away from drafts,
-                    flammable objects, children and pets. Trim the wick to about 1/4 inch before
-                    each burn, and avoid burning for more than a few hours at a time. We are not
-                    responsible for damage or injury resulting from improper use.
+                    Our {categoryName.toLowerCase()} products are handcrafted and should be used
+                    according to the care and safety instructions provided with the product.
+                    We are not responsible for damage or injury resulting from improper use.
                 </p>
             </LegalSection>
 
@@ -129,6 +131,7 @@ export default function TermsPage() {
 
             <LegalSection id="contact" heading="Contact us">
                 <p>Questions about these terms? Reach us at:</p>
+
                 <ul className="list-none space-y-1 pl-0">
                     <li>
                         <span className="text-[#B0703A]">Email: </span>
@@ -139,17 +142,20 @@ export default function TermsPage() {
                             {SITE_CONTACT.email}
                         </a>
                     </li>
+
                     <li>
                         <span className="text-[#B0703A]">Phone: </span>
                         <a href={`tel:${SITE_CONTACT.phone}`} className="text-[#4A3626]">
                             {SITE_CONTACT.phone}
                         </a>
                     </li>
+
                     <li>
                         <span className="text-[#B0703A]">Address: </span>
                         {SITE_CONTACT.address}
                     </li>
                 </ul>
+
                 <p className="pt-2 text-sm text-[#6B4A35]">
                     See also our{' '}
                     <Link

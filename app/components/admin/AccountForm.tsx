@@ -4,9 +4,8 @@ import {
     changePassword,
     updateProfile,
 } from '@/app/admin/(dashboard)/account/action';
-
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
 import {
     CheckCircle2,
     KeyRound,
@@ -16,14 +15,12 @@ import {
     ShieldCheck,
     UserRound,
 } from 'lucide-react';
-
 import {
     useState,
     useTransition,
     type FormEvent,
     type ReactNode,
 } from 'react';
-
 import { toast } from 'sonner';
 
 interface AccountFormProps {
@@ -57,17 +54,15 @@ export default function AccountForm({
 }: AccountFormProps) {
     const router = useRouter();
 
-    const [profile, setProfile] =
-        useState<ProfileForm>({
-            name: initialAdmin.name,
-            email: initialAdmin.email,
-        });
+    const [profile, setProfile] = useState<ProfileForm>({
+        name: initialAdmin.name,
+        email: initialAdmin.email,
+    });
 
-    const [password, setPassword] =
-        useState<PasswordForm>({
-            currentPassword: '',
-            newPassword: '',
-        });
+    const [password, setPassword] = useState<PasswordForm>({
+        currentPassword: '',
+        newPassword: '',
+    });
 
     const [profileErrors, setProfileErrors] =
         useState<FieldErrors>({});
@@ -136,7 +131,6 @@ export default function AccountForm({
         event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault();
-
         setProfileErrors({});
 
         startProfileTransition(async () => {
@@ -150,8 +144,7 @@ export default function AccountForm({
                 )) as ActionResultWithErrors;
 
             if (!result.success) {
-                const errors =
-                    extractErrors(result);
+                const errors = extractErrors(result);
 
                 setProfileErrors(errors);
 
@@ -182,7 +175,6 @@ export default function AccountForm({
         event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault();
-
         setPasswordErrors({});
 
         if (!password.currentPassword.trim()) {
@@ -190,7 +182,6 @@ export default function AccountForm({
                 currentPassword:
                     'Current password is required.',
             });
-
             return;
         }
 
@@ -199,7 +190,6 @@ export default function AccountForm({
                 newPassword:
                     'New password is required.',
             });
-
             return;
         }
 
@@ -211,8 +201,7 @@ export default function AccountForm({
                 )) as ActionResultWithErrors;
 
             if (!result.success) {
-                const errors =
-                    extractErrors(result);
+                const errors = extractErrors(result);
 
                 setPasswordErrors(errors);
 
@@ -253,8 +242,7 @@ export default function AccountForm({
             <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
                 {/* =====================================================
                     Header
-                ===================================================== */}
-
+                ====================================================== */}
                 <header className="border-b border-orange-100 bg-[#fffaf6] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex min-w-0 items-center gap-3.5">
@@ -279,17 +267,27 @@ export default function AccountForm({
                             </div>
                         </div>
 
-                        <div className="flex w-fit items-center gap-2 rounded-xl border border-amber-200/70 bg-white px-3 py-2.5 shadow-sm">
-                            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                                href="/admin/admin-management"
+                                className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-white px-3 py-2.5 text-xs font-semibold text-orange-700 shadow-sm transition-colors hover:border-orange-300 hover:bg-orange-50"
+                            >
+                                <UserRound className="h-4 w-4" />
+                                Admin management
+                            </Link>
 
-                            <div>
-                                <p className="text-[10px] font-medium uppercase tracking-wide text-chocolate-muted">
-                                    Security
-                                </p>
+                            <div className="flex w-fit items-center gap-2 rounded-xl border border-amber-200/70 bg-white px-3 py-2.5 shadow-sm">
+                                <ShieldCheck className="h-4 w-4 text-emerald-600" />
 
-                                <p className="text-xs font-semibold text-chocolate">
-                                    Protected account
-                                </p>
+                                <div>
+                                    <p className="text-[10px] font-medium uppercase tracking-wide text-chocolate-muted">
+                                        Security
+                                    </p>
+
+                                    <p className="text-xs font-semibold text-chocolate">
+                                        Protected account
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -297,8 +295,7 @@ export default function AccountForm({
 
                 {/* =====================================================
                     Profile
-                ===================================================== */}
-
+                ====================================================== */}
                 <AccountSection
                     icon={
                         <UserRound className="h-4 w-4" />
@@ -307,15 +304,12 @@ export default function AccountForm({
                     description="Update the name associated with your admin account."
                 >
                     <form
-                        onSubmit={
-                            handleProfileSubmit
-                        }
+                        onSubmit={handleProfileSubmit}
                         noValidate
                         className="space-y-5"
                     >
                         <div className="grid gap-5 sm:grid-cols-2">
                             {/* Name */}
-
                             <Field
                                 label="Name"
                                 htmlFor="admin-name"
@@ -330,12 +324,8 @@ export default function AccountForm({
                                         id="admin-name"
                                         name="name"
                                         type="text"
-                                        value={
-                                            profile.name
-                                        }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        value={profile.name}
+                                        onChange={(event) =>
                                             setProfileField(
                                                 'name',
                                                 event.target
@@ -356,7 +346,6 @@ export default function AccountForm({
                             </Field>
 
                             {/* Email */}
-
                             <Field
                                 label="Email address"
                                 htmlFor="admin-email"
@@ -371,9 +360,7 @@ export default function AccountForm({
                                         id="admin-email"
                                         name="email"
                                         type="email"
-                                        value={
-                                            profile.email
-                                        }
+                                        value={profile.email}
                                         readOnly
                                         aria-readonly="true"
                                         className={`${inputClass} cursor-not-allowed bg-slate-50 pl-9 text-slate-500`}
@@ -390,9 +377,7 @@ export default function AccountForm({
                         <div className="flex justify-end border-t border-orange-100 pt-4">
                             <button
                                 type="submit"
-                                disabled={
-                                    isProfilePending
-                                }
+                                disabled={isProfilePending}
                                 className={buttonClass}
                             >
                                 {isProfilePending ? (
@@ -411,8 +396,7 @@ export default function AccountForm({
 
                 {/* =====================================================
                     Password
-                ===================================================== */}
-
+                ====================================================== */}
                 <AccountSection
                     icon={
                         <KeyRound className="h-4 w-4" />
@@ -421,15 +405,12 @@ export default function AccountForm({
                     description="Update your admin password. You will need to log in again after changing it."
                 >
                     <form
-                        onSubmit={
-                            handlePasswordSubmit
-                        }
+                        onSubmit={handlePasswordSubmit}
                         noValidate
                         className="space-y-5"
                     >
                         <div className="grid gap-5 sm:grid-cols-2">
                             {/* Current password */}
-
                             <Field
                                 label="Current password"
                                 htmlFor="current-password"
@@ -447,9 +428,7 @@ export default function AccountForm({
                                         value={
                                             password.currentPassword
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             setPasswordField(
                                                 'currentPassword',
                                                 event.target
@@ -470,7 +449,6 @@ export default function AccountForm({
                             </Field>
 
                             {/* New password */}
-
                             <Field
                                 label="New password"
                                 htmlFor="new-password"
@@ -488,9 +466,7 @@ export default function AccountForm({
                                         value={
                                             password.newPassword
                                         }
-                                        onChange={(
-                                            event,
-                                        ) =>
+                                        onChange={(event) =>
                                             setPasswordField(
                                                 'newPassword',
                                                 event.target
@@ -511,36 +487,30 @@ export default function AccountForm({
                             </Field>
                         </div>
 
-                        {/* Security Note */}
+                        {/* Password reset note */}
+                        <div className="rounded-lg border border-amber-200 bg-amber-50/60 px-3.5 py-3">
+                            <div className="flex items-start gap-2.5">
+                                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
 
-                        <div className="rounded-xl border border-amber-200/70 bg-amber-50/50 p-4">
-                            <div className="flex items-start gap-3">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                                    <ShieldCheck className="h-4 w-4" />
-                                </div>
-
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-800">
-                                        Session security
-                                    </p>
-
-                                    <p className="mt-1 text-xs leading-5 text-slate-500">
-                                        Changing your password
-                                        invalidates previous
-                                        sessions and signs you
-                                        out. You will need to log
-                                        in again.
-                                    </p>
-                                </div>
+                                <p className="text-xs leading-5 text-slate-600">
+                                    Forgot your password?
+                                    <span className="font-medium text-slate-700">
+                                        {' '}
+                                        Log out first, then use{' '}
+                                        <span className="font-semibold text-amber-700">
+                                            Forgot password
+                                        </span>{' '}
+                                        on the login page. We’ll send
+                                        a reset link to your email.
+                                    </span>
+                                </p>
                             </div>
                         </div>
 
                         <div className="flex justify-end border-t border-orange-100 pt-4">
                             <button
                                 type="submit"
-                                disabled={
-                                    isPasswordPending
-                                }
+                                disabled={isPasswordPending}
                                 className={buttonClass}
                             >
                                 {isPasswordPending ? (
@@ -559,8 +529,7 @@ export default function AccountForm({
 
                 {/* =====================================================
                     Security
-                ===================================================== */}
-
+                ====================================================== */}
                 <AccountSection
                     icon={
                         <ShieldCheck className="h-4 w-4" />
@@ -588,8 +557,7 @@ export default function AccountForm({
 
                 {/* =====================================================
                     Footer
-                ===================================================== */}
-
+                ====================================================== */}
                 <div className="border-t border-orange-100 bg-[#fffaf6] px-4 py-4 sm:px-6 lg:px-8">
                     <div className="flex items-start gap-2 text-xs leading-5 text-slate-500">
                         <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />

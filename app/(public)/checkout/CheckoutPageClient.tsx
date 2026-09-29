@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 
 import { checkoutSchema } from '@/lib/validation/order.schema';
 
-import { DEFAULT_CURRENCY } from '@/lib/constants';
+import { categoryName, DEFAULT_CURRENCY } from '@/lib/constants';
 
 import { useCartStore } from '@/store/cart.store';
 
@@ -393,7 +393,7 @@ export function CheckoutPageClient() {
                         </h1>
 
                         <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
-                            Add some candles before
+                            Add some {categoryName} before
                             continuing to checkout.
                         </p>
 
@@ -401,7 +401,7 @@ export function CheckoutPageClient() {
                             href="/products"
                             className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 sm:w-auto"
                         >
-                            Shop Candles
+                            Shop {categoryName}
                         </Link>
                     </div>
                 </div>

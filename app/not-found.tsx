@@ -5,6 +5,7 @@ import {
     ArrowRight,
     Flame,
 } from 'lucide-react';
+import { categoryName } from '@/lib/constants';
 
 export default function NotFound() {
     return (
@@ -51,7 +52,7 @@ export default function NotFound() {
                             href="/products"
                             className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-100 transition hover:bg-orange-600"
                         >
-                            Explore Candles
+                            Explore {categoryName}
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Link>
                     </div>
