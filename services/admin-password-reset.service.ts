@@ -34,10 +34,11 @@ async function sendPasswordResetEmail({
     email: string;
     resetUrl: string;
 }) {
+    console.log('Password reset URL:', resetUrl);
 
-    console.log(resetUrl)
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.MAIL_FROM;
+
     if (!apiKey || !fromEmail) {
         throw new Error(
             'Password reset email configuration is missing.',
@@ -73,6 +74,7 @@ async function sendPasswordResetEmail({
                             style="
                                 margin: 0 0 16px;
                                 font-size: 24px;
+                                line-height: 1.3;
                             "
                         >
                             Reset your password
@@ -100,24 +102,77 @@ async function sendPasswordResetEmail({
                             <strong>15 minutes</strong>.
                         </p>
 
-                        <a
-                            href="${resetUrl}"
-                            style="
-                                display: inline-block;
-                                padding: 12px 20px;
-                                border-radius: 8px;
-                                background: #3b2419;
-                                color: #ffffff;
-                                text-decoration: none;
-                                font-weight: 600;
-                            "
-                        >
-                            Reset password
-                        </a>
+                        <!-- Reset button -->
+
+                        <div style="margin: 28px 0;">
+                            <a
+                                href="${resetUrl}"
+                                style="
+                                    display: inline-block;
+                                    padding: 12px 20px;
+                                    border-radius: 8px;
+                                    background-color: #d97706;
+                                    color: #ffffff;
+                                    text-decoration: none;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    line-height: 1;
+                                "
+                            >
+                                Reset password
+                            </a>
+                        </div>
+
+                        <!-- Fallback link -->
 
                         <p
                             style="
-                                margin: 24px 0 0;
+                                margin: 0 0 8px;
+                                font-size: 13px;
+                                font-weight: 600;
+                                color: #5f5148;
+                            "
+                        >
+                            Button not working?
+                        </p>
+
+                        <p
+                            style="
+                                margin: 0;
+                                font-size: 13px;
+                                line-height: 1.6;
+                                color: #8b7c72;
+                            "
+                        >
+                            Copy and paste this link into your browser:
+                        </p>
+
+                        <p
+                            style="
+                                margin: 8px 0 24px;
+                                padding: 10px 12px;
+                                border-radius: 6px;
+                                background-color: #fff7ed;
+                                border: 1px solid #fed7aa;
+                                word-break: break-all;
+                            "
+                        >
+                            <a
+                                href="${resetUrl}"
+                                style="
+                                    color: #c2410c;
+                                    text-decoration: underline;
+                                    font-size: 12px;
+                                    line-height: 1.6;
+                                "
+                            >
+                                ${resetUrl}
+                            </a>
+                        </p>
+
+                        <p
+                            style="
+                                margin: 0;
                                 line-height: 1.6;
                                 font-size: 13px;
                                 color: #8b7c72;

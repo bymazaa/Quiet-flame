@@ -56,7 +56,7 @@ const NAV_ITEMS = [
         exact: false,
     },
     {
-        href: '/admin/account/admin-management',
+        href: '/admin/admin-management',
         label: 'Admin Management',
         icon: UserCog  ,
         exact: false,
